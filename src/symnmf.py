@@ -1,6 +1,6 @@
-import sys
-import numpy as np
 import pandas as pd
+import numpy as np
+import sys
 
 
 def sys_arguments() -> tuple[int, str, str]:
@@ -16,6 +16,8 @@ def sys_arguments() -> tuple[int, str, str]:
         iv. norm: Calculate and output the normalized similarity matrix.
     3. file_name (str): The path to the Input file, it will contain N data points for all above
         goals, the file extension is .txt
+
+    :return: k, goal, file_name
     """
     k, goal, file_name = None, None, None
 
@@ -37,5 +39,24 @@ def sys_arguments() -> tuple[int, str, str]:
     return k, goal, file_name
 
 
+def h_initialization(k: int, n: int, m: float) -> np.ndarray:
+    """
+    Randomly initialize H with values from the interval [0, 2 ∗ sqrt(m/k)].
+    :param k: number of clusters
+    :param n: number of data points
+    :param m: the average of all entries of W.
+    :return: lower dimension non-negative matrix H [n×k].
+    """
+    np.random.seed(0)
+    np.random.uniform()
+
+    upper_bound = 2 * np.sqrt(m / k)
+
+    h = np.random.uniform(low=0, high=upper_bound, size=(n, k))
+
+    return h
+
+
 if __name__ == "__main__":
-    print("")
+    h = h_initialization(4,4, 0.5)
+    print("Done")
