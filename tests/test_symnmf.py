@@ -1,4 +1,4 @@
-from src.symnmf import similarity_matrix, read_data
+from src.symnmf import similarity_matrix, read_data, diag_degree_matrix
 import pytest
 import numpy as np
 
@@ -51,9 +51,31 @@ def test_similarity_matrix():
     assert np.array_equal(a3, a3_correct)
 
 
+def test_diag_degree_matrix():
+    a1 = np.array([[1, 1, 1],
+                   [1, 1, 1],
+                   [1, 1, 1]])
+
+    a2 = np.array([[2, 1, 0],
+                   [4, 5, 6],
+                   [7, 8, 9]])
+
+    d1 = diag_degree_matrix(a1)
+
+    d2 = diag_degree_matrix(a2)
+
+    d1_correct = np.array([[3, 0 , 0], [0, 3, 0], [0, 0, 3]])
+
+    d2_correct = np.array([[3, 0, 0], [0, 15, 0], [0, 0, 24]])
+
+    assert np.array_equal(d1, d1_correct)
+
+    assert np.array_equal(d2, d2_correct)
+
 def main():
     test_read_data()
     test_similarity_matrix()
+    test_diag_degree_matrix()
 
 
 if __name__ == '__main__':
