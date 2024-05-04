@@ -51,20 +51,31 @@ def read_data(file_name: str) -> np.ndarray:
         return np.array(data)
 
 
-def create_similarity_matrix(x: np.ndarray, n: int) -> np.ndarray:
+def similarity_matrix(X: np.ndarray, n: int) -> np.ndarray:
     """
     Creates the similarity matrix from the input data.
-    :param x: input data.
+    :param X: input data.
     :param n: number of data points
     :return: the similarity matrix.
     """
     # broadcasts x(n, d) to x(n, 1, d) to perform pairwise subtraction between every pair.
     # then raises to the second power and sums over the last dimension d.
-    x_norm = ((x[:, np.newaxis] - x) ** 2).sum(axis=-1)
-    a = np.exp(-x_norm / 2)
-    np.fill_diagonal(a, val=0)
+    x_norm = ((X[:, np.newaxis] - X) ** 2).sum(axis=-1)
+    A = np.exp(-x_norm / 2)
+    np.fill_diagonal(A, val=0)
 
-    return a
+    return A
+
+
+def diag_degree_matrix(A: np.ndarray) -> np.ndarray:
+    """
+    Creates the diagonal degree matrix from the matrix A.
+    :param A: the similarity matrix.
+    :return: the diagonal degree matrix
+    """
+    D = np.zeros_like(A)
+    np.fill_diagonal(D, A.sum(axis=1))
+    return D
 
 
 def h_initialization(k: int, n: int, m: float) -> np.ndarray:
@@ -88,6 +99,7 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 if __name__ == "__main__":
     x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_1.txt")
     n, d = x.shape
-    a = create_similarity_matrix(x=x, n=n)
-    h = h_initialization(k=4,n=n, m=0.5)
+    A = similarity_matrix(X=x, n=n)
+    D = diag_degree_matrix(A=A)
+    H = h_initialization(k=4,n=n, m=0.5)
     print("Done")
