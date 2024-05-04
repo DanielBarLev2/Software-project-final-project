@@ -19,12 +19,20 @@ def test_create_similarity_matrix():
                                               [4, 5, 6],
                                               [7, 8, 9]]), n=3)
 
-    assert np.array_equal(a1, np.array([0, 27,
-                                        27, 0]))
+    a1_correct = np.exp(np.array([[0, 27],
+                                  [27, 0]]) / -2)
 
-    assert np.array_equal(a2, np.array([0, 27, 108,
-                                        27, 0, 27,
-                                        108, 27, 0]))
+    np.fill_diagonal(a1_correct, 0)
+
+    a2_correct = np.exp(np.array([[0, 27, 108],
+                                  [27, 0, 27],
+                                  [108, 27, 0]]) / -2)
+
+    np.fill_diagonal(a2_correct, 0)
+
+    assert np.array_equal(a1, a1_correct)
+
+    assert np.array_equal(a2, a2_correct)
 
 
 def main():
