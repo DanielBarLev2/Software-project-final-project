@@ -39,6 +39,34 @@ def sys_arguments() -> tuple[int, str, str]:
     return k, goal, file_name
 
 
+def read_data(file_name: str) -> np.ndarray:
+    """
+    Reads the data from the input file.
+    :param file_name: The name of the text file containing the data.
+    :return:The data stored in the file as a NumPy array.
+    """
+    with open(file_name, 'r') as f:
+        lines = f.readlines()[1:]  # Skip the first line
+        data = [[float(x) for x in line.split()] for line in lines]
+        return np.array(data)
+
+
+def create_similarity_matrix(x: np.ndarray, n: int) -> np.ndarray:
+    """
+    Creates the similarity matrix from the input data.
+    :param x: input data.
+    :param n: number of data points
+    :return: the similarity matrix.
+    """
+    # broadcasts x(n, d) to x(n, 1, d) to perform pairwise subtraction between every pair.
+    # then raises to the second power and sums over the last dimension d.
+    x_norm = ((x[:, np.newaxis] - x) ** 2).sum(axis=-1)
+    a = np.exp(-x_norm / 2)
+    np.fill_diagonal(a, val=0)
+
+    return a
+
+
 def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     """
     Randomly initialize H with values from the interval [0, 2 ∗ sqrt(m/k)].
@@ -58,5 +86,8 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    h = h_initialization(4,4, 0.5)
+    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_1.txt")
+    n, d = x.shape
+    a = create_similarity_matrix(x=x, n=n)
+    h = h_initialization(k=4,n=n, m=0.5)
     print("Done")
