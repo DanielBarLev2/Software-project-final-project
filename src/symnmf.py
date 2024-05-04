@@ -78,6 +78,23 @@ def diag_degree_matrix(A: np.ndarray) -> np.ndarray:
     return D
 
 
+def normalized_similarity_matrix(A: np.ndarray, D: np.ndarray) -> np.ndarray:
+    """
+    Creates the normalized similarity matrix from the similarity matrix and from diagonal degree matrix.
+    :param A: similarity matrix
+    :param D: diagonal degree matrix
+    :return: normalized similarity matrix
+    """
+    D_sqrt_inverse = np.zeros_like(D)
+    np.fill_diagonal(D_sqrt_inverse, np.sqrt(np.diag(D)))
+    D_sqrt_inverse = np.linalg.matrix_power(D_sqrt_inverse, -1)
+
+    W = np.matmul(D_sqrt_inverse, A)
+    W = np.matmul(W, D_sqrt_inverse)
+
+    return W
+
+
 def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     """
     Randomly initialize H with values from the interval [0, 2 ∗ sqrt(m/k)].
@@ -97,9 +114,10 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_1.txt")
+    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_2.txt")
     n, d = x.shape
     A = similarity_matrix(X=x, n=n)
     D = diag_degree_matrix(A=A)
+    W = normalized_similarity_matrix(A=A, D=D)
     H = h_initialization(k=4,n=n, m=0.5)
     print("Done")
