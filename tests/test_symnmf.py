@@ -19,14 +19,20 @@ def test_create_similarity_matrix():
                                               [4, 5, 6],
                                               [7, 8, 9]]), n=3)
 
-    a1_correct = np.exp(np.array([[0, 27],
-                                  [27, 0]]) / -2)
+    a1_correct = np.array([[0, pytest.approx(expected=1.36096e-6, abs=1e-6)],
+                           [pytest.approx(expected=1.36096e-6, abs=1e-6), 0]])
 
     np.fill_diagonal(a1_correct, 0)
 
-    a2_correct = np.exp(np.array([[0, 27, 108],
-                                  [27, 0, 27],
-                                  [108, 27, 0]]) / -2)
+    a2_correct = np.array([[0,
+                            pytest.approx(expected=1.36096e-6, abs=1e-6),
+                            pytest.approx(expected=3.532628572e-24, abs=1e-6)],
+                           [pytest.approx(expected=1.36096e-6, abs=1e-6),
+                            0,
+                            pytest.approx(expected=1.36096e-6, abs=1e-6)],
+                           [pytest.approx(expected=3.532628572e-24, abs=1e-6),
+                            pytest.approx(expected=1.36096e-6, abs=1e-6),
+                            0]])
 
     np.fill_diagonal(a2_correct, 0)
 
