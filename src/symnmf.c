@@ -9,7 +9,7 @@
 
 void getDimension(const char *fileName, int* n, int* d);
 Vector *convertToVectors(const char* filename, int n, int d);
-Vector *sym(Vector* vectorList, int n);
+Vector *sym(Vector* X, int n);
 
 
 void getDimension(const char *fileName, int* n, int* d) {
@@ -45,15 +45,15 @@ void getDimension(const char *fileName, int* n, int* d) {
 
 
 Vector *convertToVectors(const char* filename, int n, int d) {
+    Vector *X;
     int i = 0;
     char *token;
     int dimension;
     double *components;
-    Vector *vectorList;
     char line[MAX_ROW_LEN];
 
-    vectorList = malloc(n * sizeof(Vector));
-    if (vectorList == NULL) {
+    X = malloc(n * sizeof(Vector));
+    if (X == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
@@ -79,26 +79,25 @@ Vector *convertToVectors(const char* filename, int n, int d) {
             token = strtok(NULL, " ");
         }
 
-        vectorList[i] = createVector(d, components);
+        X[i] = createVector(d, components);
         i++;
     }
     fclose(file);
 
-    return vectorList;
+    return X;
 }
 
 
-
 // Creates the similarity matrix from the input data.
-Vector *sym(Vector* vectorList, int n){
+Vector *sym(Vector* X, int n){
     double distance;
     int current, other;
     double *components;
-    Vector *outputMatrix;
+    Vector *A;
 
-    outputMatrix = malloc(n * sizeof(Vector));
+    A = malloc(n * sizeof(Vector));
 
-    if (outputMatrix == NULL) {
+    if (A == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
@@ -114,21 +113,22 @@ Vector *sym(Vector* vectorList, int n){
         for (other = 0; other < n; other++){
 
             if (current != other){
-                distance = euclidean_distance(vectorList[current], vectorList[other]);
+                distance = euclidean_distance(X[current], X[other]);
                 components[other] = exp((pow(distance, 2) / - 2));
             }
             else{
                 components[other] = 0;
             }
         }
-        outputMatrix[current] = createVector(n, components);
+        A[current] = createVector(n, components);
         free(components);
     }
 
-    return outputMatrix;
+    return A;
 }
 
 
+//Creates the diagonal degree matrix from the matrix A.
 int ddg(){
     return 0;
 }
@@ -141,27 +141,30 @@ int norm(){
 
 int main(int argc, char *argv[]) {
     int n, d;
+    Vector *X;
+    Vector *A;
+    Vector *D;
+    Vector *W;
     char *goal;
     const char *fileName;
-    Vector *vectorList;
-    Vector *outputMatrix;
 
     // for CMD testing
-    // goal = argv[1];
-    // fileName = argv[2];
+     goal = argv[1];
+     fileName = argv[2];
 
     // for internal testing
     goal = "ddg";
-    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_1.txt";
+    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_7.txt";
 
     getDimension(fileName, &n, &d);
 
-    vectorList = convertToVectors(fileName, n, d);
+    X = convertToVectors(fileName, n, d);
 
     if (strcmp(goal,"sym") == 0){
-        outputMatrix = sym(vectorList, n);
+        A = sym(X, n);
     }
     if (strcmp(goal,"ddg") == 0){
+        A = sym(X, n);
         ddg();
     }
 
@@ -171,18 +174,18 @@ int main(int argc, char *argv[]) {
 
      // Print
      for (int i = 0; i < n; i++) {
-         printVector(vectorList[i]);
+         printVector(X[i]);
      }
      printf("\n");
 
     // Print
     for (int i = 0; i < n; i++) {
-        printVector(outputMatrix[i]);
+        printVector(A[i]);
     }
     printf("\n");
 
-    free(vectorList);
-    free(outputMatrix);
+    free(X);
+    free(A);
 
     return 0;
 }
