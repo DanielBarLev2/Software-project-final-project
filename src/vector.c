@@ -1,8 +1,8 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "vector.h" 
+
 
 Vector createVector(int dimension, double *values) {
     Vector vec;
@@ -25,6 +25,7 @@ Vector createVector(int dimension, double *values) {
     }
     return vec;
 }
+
 
 Vector add(Vector vec1, Vector vec2) {
     Vector result;
