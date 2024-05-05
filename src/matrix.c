@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "matrix.h"
-#include <math.h>
+
 
 Matrix createMatrix(int rows, int cols, double **values) {
     Matrix matrix;
@@ -65,6 +65,7 @@ Matrix createZeroMatrix(int rows, int cols) {
     return mat;
 }
 
+
 void freeMatrix(Matrix matrix) {
     int i;
     for (i = 0; i < matrix.rows; i++) {
@@ -108,6 +109,7 @@ Matrix multiplyScalarMatrix(Matrix matrix, double scalar) {
     return result;
 }
 
+
 void printMatrix(Matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.rows; i++) {
@@ -117,6 +119,7 @@ void printMatrix(Matrix matrix) {
         printf("\n");
     }
 }
+
 
 double sumRow(Matrix matrix, int row) {
     double sum = 0.0;
@@ -128,12 +131,24 @@ double sumRow(Matrix matrix, int row) {
     return sum;
 }
 
+
 double sumColumn(Matrix matrix, int col) {
     double sum = 0.0;
     int i;
 
     for (i = 0; i < matrix.rows; i++) {
         sum += matrix.data[i][col];
+    }
+    return sum;
+}
+
+
+double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
+    double sum = 0.0;
+    int i;
+    for (i = 0; i < size; i++) {
+        double diff = vector1[i] - vector2[i];
+        sum += diff * diff;
     }
     return sum;
 }

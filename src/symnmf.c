@@ -12,7 +12,8 @@
 
 void getDimension(const char *fileName, int* n, int* d);
 Matrix readData(const char* filename, int n, int d);
-Vector *sym(Vector* X, int n);
+Matrix sym(Matrix X);
+Matrix ddg(Matrix A);
 
 
 void getDimension(const char *fileName, int* n, int* d) {
@@ -45,7 +46,7 @@ void getDimension(const char *fileName, int* n, int* d) {
     fclose(file);
 }
 
-
+// Reads the data from the input file.
 Matrix readData(const char* filename, int n, int d) {
     Matrix X;
     char *token;
@@ -81,39 +82,26 @@ Matrix readData(const char* filename, int n, int d) {
 
 
 // Creates the similarity matrix from the input data.
-Vector *sym(Vector* X, int n){
+Matrix sym(Matrix X){
+    Matrix A;
     double distance;
     int current, other;
-    double *components;
-    Vector *A;
+    double *currentVector, *otherVector;
 
-    A = malloc(n * sizeof(Vector));
+    A = createZeroMatrix(X.rows, X.rows);
 
-    if (A == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (current = 0; current < n; current++){
-        components = malloc(n * sizeof(double));
-
-        if (components == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(EXIT_FAILURE);
-        }
-
-        for (other = 0; other < n; other++){
-
+    for (current = 0; current < X.rows; current++){
+        for (other = 0; other < X.rows; other++){
             if (current != other){
-                distance = euclidean_distance(X[current], X[other]);
-                components[other] = exp((pow(distance, 2) / - 2));
+                currentVector = X.data[current];
+                otherVector = X.data[other];
+                distance = squaredEuclideanDistance(currentVector, otherVector, X.cols);
+                A.data[current][other] =  exp((distance / -2));
             }
             else{
-                components[other] = 0;
+                A.data[current][other] = 0.0;
             }
         }
-        A[current] = createVector(n, components);
-        free(components);
     }
 
     return A;
@@ -121,34 +109,12 @@ Vector *sym(Vector* X, int n){
 
 
 //Creates the diagonal degree matrix from the matrix A.
-Vector *ddg(Vector* A, int n){
+Matrix ddg(Matrix A){
     double *components, rowSum;
     int row, col;
-    Vector *D;
+    Matrix D;
 
-    D = malloc(n * sizeof(Vector));
-
-    for (row = 0; row < n; row++){
-        components = malloc(n * sizeof(double));
-        rowSum = 0;
-
-        for (col = 0; col < n; col ++){
-            rowSum += A[row].components[col];
-        }
-
-        for (col = 0; col < n; col++){
-            if (col == row){
-                components[col] = rowSum;
-            }
-            else{
-               components[col] = 0.0;
-            }
-        }
-
-        D[row] = createVector(n, components);
-
-        free(components);
-    }
+    D = createZeroMatrix(A.rows, A.cols);
 
     return D;
 }
@@ -162,9 +128,9 @@ int norm(){
 int main(int argc, char *argv[]) {
     int n, d;
     Matrix X;
-    Vector *A;
-    Vector *D;
-    Vector *W;
+    Matrix A;
+    Matrix D;
+    Matrix W;
     char *goal;
     const char *fileName;
 
@@ -181,34 +147,22 @@ int main(int argc, char *argv[]) {
     X = readData(fileName, n, d);
     printMatrix(X);
 
-//    if (strcmp(goal,"sym") == 0){
-//        A = sym(X, n);
-//    }
-//    if (strcmp(goal,"ddg") == 0){
-//        A = sym(X, n);
-//        D = ddg(A, n);
-//    }
-//
-//    if (strcmp(goal,"norm") == 0){
-//        norm();
-//    }
-//
-//     // Print
-//     for (int i = 0; i < n; i++) {
-//         printVector(X[i]);
-//     }
-//     printf("\n");
-//
-//    // Print
-//    for (int i = 0; i < n; i++) {
-//        printVector(D[i]);
-//    }
-//    printf("\n");
-//
-//    free(A);
-//    free(D);
+    if ((strcmp(goal,"sym") == 0) || (strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)) {
+        A = sym(X);
 
-    freeMatrix(X);
+        printMatrix(A);
 
+        if ((strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)){
+//            D = ddg(A);
+
+            if (strcmp(goal,"norm") == 0){
+                norm();
+            }
+
+        }
+
+        freeMatrix(X);
+        freeMatrix(A);
+    }
     return 0;
 }

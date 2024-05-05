@@ -46,7 +46,7 @@ def read_data(file_name: str) -> np.ndarray:
     :return:The data stored in the file as a NumPy array.
     """
     with open(file_name, 'r') as f:
-        lines = f.readlines()[1:]  # Skip the first line
+        lines = f.readlines()[0:]  # Skip the first line
         data = [[float(x) for x in line.split()] for line in lines]
         return np.array(data)
 
@@ -114,7 +114,7 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_2.txt")
+    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt")
     n, d = x.shape
     A = similarity_matrix(X=x, n=n)
     D = diag_degree_matrix(A=A)
