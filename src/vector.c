@@ -74,13 +74,12 @@ double euclidean_distance(Vector vec1, Vector vec2) {
 
 void printVector(Vector vec) {
     int i;
-    printf("(");
 
     for (i = 0; i < vec.dimension; i++) {
         printf("%.4f", vec.components[i]);
         if (i < vec.dimension - 1) {
-            printf(", ");
+            printf(",");
         }
     }
-    printf(")\n");
+    printf("\n");
 }
