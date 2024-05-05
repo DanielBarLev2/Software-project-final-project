@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+
 #include "vector.h"
 #include "vector.c"
-#include <math.h>
+#include "matrix.c"
+#include "matrix.h"
 
 #define MAX_ROW_LEN 1024
 
 void getDimension(const char *fileName, int* n, int* d);
-Vector *convertToVectors(const char* filename, int n, int d);
+Matrix readData(const char* filename, int n, int d);
 Vector *sym(Vector* X, int n);
 
 
@@ -32,7 +35,6 @@ void getDimension(const char *fileName, int* n, int* d) {
             (*d)++;
             token = strtok(NULL, " \t\n");
         }
-
         (*n)++;
     }
 
@@ -44,19 +46,13 @@ void getDimension(const char *fileName, int* n, int* d) {
 }
 
 
-Vector *convertToVectors(const char* filename, int n, int d) {
-    Vector *X;
-    int i = 0;
+Matrix readData(const char* filename, int n, int d) {
+    Matrix X;
     char *token;
-    int dimension;
-    double *components;
+    int row, col;
     char line[MAX_ROW_LEN];
 
-    X = malloc(n * sizeof(Vector));
-    if (X == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
+    X = createZeroMatrix(n, d);
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -64,24 +60,20 @@ Vector *convertToVectors(const char* filename, int n, int d) {
         exit(EXIT_FAILURE);
     }
 
+    row = 0;
     while (fgets(line, sizeof(line), file)) {
-        dimension = 0;
         token = strtok(line, " ");
-        components = malloc(d * sizeof(double));
-        if (components == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(EXIT_FAILURE);
-        }
+        col = 0;
 
         while (token != NULL) {
             char *endptr;
-            components[dimension++] = strtod(token, &endptr);
+            X.data[row][col] = strtod(token, &endptr);
             token = strtok(NULL, " ");
+            col++;
         }
-
-        X[i] = createVector(d, components);
-        i++;
+        row++;
     }
+
     fclose(file);
 
     return X;
@@ -169,7 +161,7 @@ int norm(){
 
 int main(int argc, char *argv[]) {
     int n, d;
-    Vector *X;
+    Matrix X;
     Vector *A;
     Vector *D;
     Vector *W;
@@ -186,35 +178,37 @@ int main(int argc, char *argv[]) {
 
     getDimension(fileName, &n, &d);
 
-    X = convertToVectors(fileName, n, d);
+    X = readData(fileName, n, d);
+    printMatrix(X);
 
-    if (strcmp(goal,"sym") == 0){
-        A = sym(X, n);
-    }
-    if (strcmp(goal,"ddg") == 0){
-        A = sym(X, n);
-        D = ddg(A, n);
-    }
+//    if (strcmp(goal,"sym") == 0){
+//        A = sym(X, n);
+//    }
+//    if (strcmp(goal,"ddg") == 0){
+//        A = sym(X, n);
+//        D = ddg(A, n);
+//    }
+//
+//    if (strcmp(goal,"norm") == 0){
+//        norm();
+//    }
+//
+//     // Print
+//     for (int i = 0; i < n; i++) {
+//         printVector(X[i]);
+//     }
+//     printf("\n");
+//
+//    // Print
+//    for (int i = 0; i < n; i++) {
+//        printVector(D[i]);
+//    }
+//    printf("\n");
+//
+//    free(A);
+//    free(D);
 
-    if (strcmp(goal,"norm") == 0){
-        norm();
-    }
-
-     // Print
-     for (int i = 0; i < n; i++) {
-         printVector(X[i]);
-     }
-     printf("\n");
-
-    // Print
-    for (int i = 0; i < n; i++) {
-        printVector(D[i]);
-    }
-    printf("\n");
-
-    free(X);
-    free(A);
-    free(D);
+    freeMatrix(X);
 
     return 0;
 }
