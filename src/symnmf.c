@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "vector.h"
 #include "vector.c"
+#include <math.h>
 
 #define MAX_ROW_LEN 1024
 
 void getDimension(const char *fileName, int* n, int* d);
 Vector *convertToVectors(const char* filename, int n, int d);
+Vector *sym(Vector* vectorList, int n);
 
 
 void getDimension(const char *fileName, int* n, int* d) {
@@ -42,12 +45,12 @@ void getDimension(const char *fileName, int* n, int* d) {
 
 
 // This function reads data from a file, tokenizes each line, and stores the values as components of Vector objects.
-Vector* convertToVectors(const char* filename, int n, int d) {
+Vector *convertToVectors(const char* filename, int n, int d) {
     int i = 0;
-    Vector *vectorsList;
     char line[MAX_ROW_LEN];
+    Vector *vectorList;
 
-    vectorsList = malloc(n * sizeof(Vector));
+    vectorList = malloc(n * sizeof(Vector));
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -55,12 +58,8 @@ Vector* convertToVectors(const char* filename, int n, int d) {
         exit(EXIT_FAILURE);
     }
 
-    if (vectorsList == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
-
     while (fgets(line, sizeof(line), file)) {
+
         char *token = strtok(line, " ");
         int dimension = 0;
         double *components = malloc(d * sizeof(double)); 
@@ -74,20 +73,52 @@ Vector* convertToVectors(const char* filename, int n, int d) {
             token = strtok(NULL, " ");
         }
 
-        vectorsList[i].dimension = dimension;
-        vectorsList[i].components = components;
-        vectorsList[i].centroid = 0;
+        vectorList[i] = createVector(d, components);
+        vectorList[i].centroid = 0;
         i++;
     }
-
     fclose(file);
 
-    return vectorsList;
+    return vectorList;
 }
 
 
-int sym(){
-    return 0;
+// Creates the similarity matrix from the input data.
+Vector *sym(Vector* vectorList, int n){
+    double distance;
+    Vector *outputMatrix;
+    int current, other;
+
+    outputMatrix = malloc(n * sizeof(Vector));
+
+    if (outputMatrix == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (current = 0; current < n; current++){
+        double *components = malloc(n * sizeof(double));
+
+        if (components == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(EXIT_FAILURE);
+        }
+
+        for (other = 0; other < n; other++){
+
+            if (current != other){
+                distance = euclidean_distance(vectorList[current], vectorList[other]);
+                components[other] = exp((pow(distance, 2) / - 2));
+            }
+            else{
+                components[other] = 0;
+            }
+        }
+        outputMatrix[current] = createVector(n, components);
+        free(components);
+    }
+
+    return outputMatrix;
 }
 
 
@@ -106,6 +137,7 @@ int main(int argc, char *argv[]) {
     char *goal;
     const char *fileName;
     Vector *vectorList;
+    Vector *outputMatrix;
 
     // for CMD testing
     // goal = argv[1];
@@ -113,14 +145,14 @@ int main(int argc, char *argv[]) {
 
     // for internal testing
     goal = "sym";
-    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_1.txt";
+    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_2.txt";
 
     getDimension(fileName, &n, &d);
 
     vectorList = convertToVectors(fileName, n, d);
 
     if (strcmp(goal,"sym") == 0){
-        sym();
+        outputMatrix = sym(vectorList, n);
     }
     if (strcmp(goal,"ddg") == 0){
         ddg();
@@ -130,13 +162,20 @@ int main(int argc, char *argv[]) {
         norm();
     }
 
-     // Print final centroids
+     // Print
      for (int i = 0; i < n; i++) {
          printVector(vectorList[i]);
      }
      printf("\n");
 
+    // Print
+    for (int i = 0; i < n; i++) {
+        printVector(outputMatrix[i]);
+    }
+    printf("\n");
+
     free(vectorList);
+    free(outputMatrix);
 
     return 0;
 }
