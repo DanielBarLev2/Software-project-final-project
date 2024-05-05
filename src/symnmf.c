@@ -44,13 +44,19 @@ void getDimension(const char *fileName, int* n, int* d) {
 }
 
 
-// This function reads data from a file, tokenizes each line, and stores the values as components of Vector objects.
 Vector *convertToVectors(const char* filename, int n, int d) {
     int i = 0;
-    char line[MAX_ROW_LEN];
+    char *token;
+    int dimension;
+    double *components;
     Vector *vectorList;
+    char line[MAX_ROW_LEN];
 
     vectorList = malloc(n * sizeof(Vector));
+    if (vectorList == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
 
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
@@ -59,22 +65,21 @@ Vector *convertToVectors(const char* filename, int n, int d) {
     }
 
     while (fgets(line, sizeof(line), file)) {
-
-        char *token = strtok(line, " ");
-        int dimension = 0;
-        double *components = malloc(d * sizeof(double)); 
+        dimension = 0;
+        token = strtok(line, " ");
+        components = malloc(d * sizeof(double));
         if (components == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
             exit(EXIT_FAILURE);
         }
 
         while (token != NULL) {
-            components[dimension++] = atof(token);
+            char *endptr;
+            components[dimension++] = strtod(token, &endptr);
             token = strtok(NULL, " ");
         }
 
         vectorList[i] = createVector(d, components);
-        vectorList[i].centroid = 0;
         i++;
     }
     fclose(file);
@@ -83,11 +88,13 @@ Vector *convertToVectors(const char* filename, int n, int d) {
 }
 
 
+
 // Creates the similarity matrix from the input data.
 Vector *sym(Vector* vectorList, int n){
     double distance;
-    Vector *outputMatrix;
     int current, other;
+    double *components;
+    Vector *outputMatrix;
 
     outputMatrix = malloc(n * sizeof(Vector));
 
@@ -97,7 +104,7 @@ Vector *sym(Vector* vectorList, int n){
     }
 
     for (current = 0; current < n; current++){
-        double *components = malloc(n * sizeof(double));
+        components = malloc(n * sizeof(double));
 
         if (components == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
@@ -144,8 +151,8 @@ int main(int argc, char *argv[]) {
     // fileName = argv[2];
 
     // for internal testing
-    goal = "sym";
-    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_2.txt";
+    goal = "ddg";
+    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_1.txt";
 
     getDimension(fileName, &n, &d);
 
