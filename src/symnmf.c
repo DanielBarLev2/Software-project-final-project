@@ -129,8 +129,36 @@ Vector *sym(Vector* X, int n){
 
 
 //Creates the diagonal degree matrix from the matrix A.
-int ddg(){
-    return 0;
+Vector *ddg(Vector* A, int n){
+    double *components, rowSum;
+    int row, col;
+    Vector *D;
+
+    D = malloc(n * sizeof(Vector));
+
+    for (row = 0; row < n; row++){
+        components = malloc(n * sizeof(double));
+        rowSum = 0;
+
+        for (col = 0; col < n; col ++){
+            rowSum += A[row].components[col];
+        }
+
+        for (col = 0; col < n; col++){
+            if (col == row){
+                components[col] = rowSum;
+            }
+            else{
+               components[col] = 0.0;
+            }
+        }
+
+        D[row] = createVector(n, components);
+
+        free(components);
+    }
+
+    return D;
 }
 
 
@@ -149,8 +177,8 @@ int main(int argc, char *argv[]) {
     const char *fileName;
 
     // for CMD testing
-     goal = argv[1];
-     fileName = argv[2];
+    goal = argv[1];
+    fileName = argv[2];
 
     // for internal testing
     goal = "ddg";
@@ -165,7 +193,7 @@ int main(int argc, char *argv[]) {
     }
     if (strcmp(goal,"ddg") == 0){
         A = sym(X, n);
-        ddg();
+        D = ddg(A, n);
     }
 
     if (strcmp(goal,"norm") == 0){
@@ -180,12 +208,13 @@ int main(int argc, char *argv[]) {
 
     // Print
     for (int i = 0; i < n; i++) {
-        printVector(A[i]);
+        printVector(D[i]);
     }
     printf("\n");
 
     free(X);
     free(A);
+    free(D);
 
     return 0;
 }
