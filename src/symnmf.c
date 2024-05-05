@@ -120,9 +120,17 @@ Matrix ddg(Matrix A){
     return D;
 }
 
+// Creates the normalized similarity matrix from the similarity matrix and from diagonal degree matrix.
+Matrix norm(Matrix D, Matrix A){
+    Matrix W, T;
 
-int norm(){
-    return 0;
+    T = powerDiagMatrix(D, (-0.5));
+    W = multiplyMatrix(T, A);
+    W = multiplyMatrix(W, T);
+
+    freeMatrix(T);
+
+    return W;
 }
 
 
@@ -140,7 +148,7 @@ int main(int argc, char *argv[]) {
     fileName = argv[2];
 
     // for internal testing
-    goal = "ddg";
+    goal = "norm";
     fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_7.txt";
 
     getDimension(fileName, &n, &d);
@@ -154,7 +162,7 @@ int main(int argc, char *argv[]) {
             D = ddg(A);
 
             if (strcmp(goal,"norm") == 0){
-                norm();
+                W = norm(D, A);
             }
         }
 

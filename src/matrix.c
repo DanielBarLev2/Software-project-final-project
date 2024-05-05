@@ -154,6 +154,19 @@ double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
 }
 
 
+Matrix powerDiagMatrix(Matrix matrix, double power) {
+    Matrix result;
+    int i;
+
+    result = createMatrix(matrix.rows, matrix.cols, NULL);
+
+    for (i = 0; i < matrix.rows; i++) {
+        result.data[i][i] = pow(matrix.data[i][i], power);
+    }
+    return result;
+}
+
+
 Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
     int i, j, k;
     if (matrix1.cols != matrix2.rows) {
