@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "vector.h"
-#include "vector.c"
 #include "matrix.c"
 #include "matrix.h"
 
@@ -110,11 +108,14 @@ Matrix sym(Matrix X){
 
 //Creates the diagonal degree matrix from the matrix A.
 Matrix ddg(Matrix A){
-    double *components, rowSum;
-    int row, col;
+    int diag;
     Matrix D;
 
     D = createZeroMatrix(A.rows, A.cols);
+
+    for (diag = 0; diag < A.rows; diag++){
+        D.data[diag][diag] = sumRow(A, diag);
+    }
 
     return D;
 }
@@ -145,24 +146,34 @@ int main(int argc, char *argv[]) {
     getDimension(fileName, &n, &d);
 
     X = readData(fileName, n, d);
-    printMatrix(X);
 
     if ((strcmp(goal,"sym") == 0) || (strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)) {
         A = sym(X);
 
-        printMatrix(A);
-
         if ((strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)){
-//            D = ddg(A);
+            D = ddg(A);
 
             if (strcmp(goal,"norm") == 0){
                 norm();
             }
-
         }
 
+        printf("current test for matrix:\n");
+        printMatrix(X);
         freeMatrix(X);
-        freeMatrix(A);
+
+        if (strcmp(goal,"sym") == 0){
+            printMatrix(A);
+            freeMatrix(A);
+        }
+        if (strcmp(goal,"ddg") == 0){
+            printMatrix(D);
+            freeMatrix(D);
+        }
+        if (strcmp(goal,"norm") == 0){
+            printMatrix(W);
+            freeMatrix(W);
+        }
     }
     return 0;
 }
