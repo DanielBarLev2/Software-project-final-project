@@ -16,5 +16,6 @@ void printMatrix(Matrix matrix);
 double sumRow(Matrix matrix, int row);
 double sumColumn(Matrix matrix, int col);
 double squaredEuclideanDistance(double *vector1, double *vector2, int size);
+Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2);
 
 #endif /* MATRIX_H */

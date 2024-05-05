@@ -152,3 +152,25 @@ double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
     }
     return sum;
 }
+
+
+Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
+    int i, j, k;
+    if (matrix1.cols != matrix2.rows) {
+        fprintf(stderr, "Number of columns in the first matrix must be equal to the number of rows in the second matrix for multiplication\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix result;
+    result = createZeroMatrix(matrix1.rows, matrix2.cols);
+
+    for (i = 0; i < matrix1.rows; i++) {
+        for (j = 0; j < matrix2.cols; j++) {
+            for (k = 0; k < matrix1.cols; k++) {
+                result.data[i][j] += matrix1.data[i][k] * matrix2.data[k][j];
+            }
+        }
+    }
+
+    return result;
+}
