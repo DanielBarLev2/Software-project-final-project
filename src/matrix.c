@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix.h"
+#include <math.h>
 
+#include "matrix.h"
 
 Matrix createMatrix(int rows, int cols, double **values) {
     Matrix matrix;
@@ -169,12 +170,13 @@ Matrix powerDiagMatrix(Matrix matrix, double power) {
 
 Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
     int i, j, k;
+    Matrix result;
+
     if (matrix1.cols != matrix2.rows) {
         fprintf(stderr, "Number of columns in the first matrix must be equal to the number of rows in the second matrix for multiplication\n");
         exit(EXIT_FAILURE);
     }
 
-    Matrix result;
     result = createZeroMatrix(matrix1.rows, matrix2.cols);
 
     for (i = 0; i < matrix1.rows; i++) {

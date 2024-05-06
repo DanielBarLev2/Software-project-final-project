@@ -12,6 +12,7 @@ void getDimension(const char *fileName, int* n, int* d);
 Matrix readData(const char* filename, int n, int d);
 Matrix sym(Matrix X);
 Matrix ddg(Matrix A);
+Matrix norm(Matrix D, Matrix A);
 
 
 void getDimension(const char *fileName, int* n, int* d) {
@@ -28,7 +29,6 @@ void getDimension(const char *fileName, int* n, int* d) {
     }
 
     if (fgets(line, sizeof(line), file) != NULL) {
-        // Count numbers
         token = strtok(line, " \t\n");
         while (token != NULL) {
             (*d)++;
@@ -44,16 +44,17 @@ void getDimension(const char *fileName, int* n, int* d) {
     fclose(file);
 }
 
-// Reads the data from the input file.
+
 Matrix readData(const char* filename, int n, int d) {
     Matrix X;
+    FILE *file;
     char *token;
     int row, col;
     char line[MAX_ROW_LEN];
 
     X = createZeroMatrix(n, d);
 
-    FILE *file = fopen(filename, "r");
+    file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error opening file\n");
         exit(EXIT_FAILURE);
@@ -79,7 +80,6 @@ Matrix readData(const char* filename, int n, int d) {
 }
 
 
-// Creates the similarity matrix from the input data.
 Matrix sym(Matrix X){
     Matrix A;
     double distance;
@@ -106,7 +106,6 @@ Matrix sym(Matrix X){
 }
 
 
-//Creates the diagonal degree matrix from the matrix A.
 Matrix ddg(Matrix A){
     int diag;
     Matrix D;
@@ -120,7 +119,7 @@ Matrix ddg(Matrix A){
     return D;
 }
 
-// Creates the normalized similarity matrix from the similarity matrix and from diagonal degree matrix.
+
 Matrix norm(Matrix D, Matrix A){
     Matrix W, T;
 
@@ -143,11 +142,11 @@ int main(int argc, char *argv[]) {
     char *goal;
     const char *fileName;
 
-    // for CMD testing
-    goal = argv[1];
-    fileName = argv[2];
-
-    // for internal testing
+    if (argc > 0){
+        goal = argv[1];
+        fileName = argv[2];
+    }
+        
     goal = "norm";
     fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_7.txt";
 
