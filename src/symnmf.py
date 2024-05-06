@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 
-def sys_arguments() -> tuple[int, str, str]:
+def sys_arguments():
     """
     Parses command-line arguments.
 
@@ -21,8 +21,8 @@ def sys_arguments() -> tuple[int, str, str]:
     """
     k, goal, file_name = None, None, None
 
-    if len(sys.argv) != 3:
-        raise ValueError("Not enough cmd arguments")
+    if len(sys.argv) != 4:
+        raise ValueError(len(sys.argv), " are not enough cmd arguments")
 
     try:
         k = int(sys.argv[1])
@@ -114,10 +114,19 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    x = read_data(file_name="C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt")
+    # file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
+    # file_name = "C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt"
+    k, goal, file_name = sys_arguments()
+
+    x = read_data(file_name=file_name)
     n, d = x.shape
     A = similarity_matrix(X=x, n=n)
     D = diag_degree_matrix(A=A)
     W = normalized_similarity_matrix(A=A, D=D)
     H = h_initialization(k=4,n=n, m=0.5)
+
+    print(A)
+    print(D)
+    print(W)
+
     print("Done")
