@@ -115,9 +115,12 @@ void printMatrix(Matrix matrix) {
     int i, j;
     for (i = 0; i < matrix.rows; i++) {
         for (j = 0; j < matrix.cols; j++) {
-            printf("%.4f\t", matrix.data[i][j]);
+            printf("%.4f", matrix.data[i][j]);
+            if (j < matrix.cols - 1)
+                printf(",");
+            else
+                printf("\n");
         }
-        printf("\n");
     }
 }
 

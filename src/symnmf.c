@@ -133,7 +133,11 @@ Matrix norm(Matrix D, Matrix A){
 }
 
 
+<<<<<<< HEAD
 Matrix symnmf(char *goal, const char *fileName){
+=======
+Matrix symnmf(char *goal, char *fileName){
+>>>>>>> 926c5e15ce5389998fba74b209cd0aabf4370835
     int n, d;
     Matrix X;
     Matrix A;
@@ -144,6 +148,7 @@ Matrix symnmf(char *goal, const char *fileName){
 
     X = readData(fileName, n, d);
 
+<<<<<<< HEAD
     if ((strcmp(goal,"sym") == 0) || (strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)) {
         A = sym(X);
 
@@ -177,6 +182,37 @@ Matrix symnmf(char *goal, const char *fileName){
     return X;
 }
 
+=======
+    if (strcmp(goal,"sym") == 0){
+        A = sym(X);
+        freeMatrix(A);
+        freeMatrix(X);
+        return(A);
+    }
+    if (strcmp(goal,"ddg") == 0){
+        A = sym(X);
+        D = ddg(A);
+        freeMatrix(D);
+        freeMatrix(A);
+        freeMatrix(X);
+        return(D);
+    }
+    if (strcmp(goal,"norm") == 0){
+        A = sym(X);
+        D = ddg(A);
+        W = norm(D, A);
+        freeMatrix(W);
+        freeMatrix(D);
+        freeMatrix(A);
+        freeMatrix(X);
+        return(W);
+    }
+
+    return X;
+}
+
+
+>>>>>>> 926c5e15ce5389998fba74b209cd0aabf4370835
 int main(int argc, char *argv[]) {
     int n, d;
     Matrix X;
