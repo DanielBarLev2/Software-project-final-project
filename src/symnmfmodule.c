@@ -42,7 +42,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
 }
 
 /* C function wrapper for symnmf */
-static PyObject* symnmf_c(PyObject* self, PyObject* args) {
+static PyObject* symnmf_goal(PyObject* self, PyObject* args) {
     char *goal, *fileName;
     PyObject *pyOutputMatrixObj;
     Matrix outputMatrix;
@@ -62,9 +62,9 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
 }
 
 /* Method definitions */
-static PyMethodDef myModule_methods[] = {
+static PyMethodDef symnmfMethods[] = {
     {"getGoal",
-      (PyCFunction) symnmf_c,
+      (PyCFunction) symnmf_goal,
       METH_VARARGS,
       PyDoc_STR("C implementation to symmetry matrix non-negative matrix factorization.\n\n"
                 "Arguments:\n"
@@ -78,18 +78,18 @@ static PyMethodDef myModule_methods[] = {
 };
 
 /* Module initialization */
-static struct PyModuleDef myModule_definition = {
+static struct PyModuleDef symnmfmoudle = {
     PyModuleDef_HEAD_INIT,
     "symnmfModule",
     "A Python module that implements symmetry matrix non-negative matrix factorization.",
     -1,
-    myModule_methods
+    symnmfMethods
 };
 
 /* Module initialization function */
-PyMODINIT_FUNC PyInit_mykmeanssp(void) {
+PyMODINIT_FUNC PyInit_sym(void) {
     PyObject *m;
-    m = PyModule_Create(&myModule_definition);
+    m = PyModule_Create(&symnmfmoudle);
     if (!m) {
         return NULL; /* Module creation failed */
     }

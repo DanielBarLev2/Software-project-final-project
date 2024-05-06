@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import sym 
 
 
 def sys_arguments():
