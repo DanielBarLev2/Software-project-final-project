@@ -133,6 +133,40 @@ Matrix norm(Matrix D, Matrix A){
 }
 
 
+Matrix symnmf(char *goal, char *fileName){
+    int n, d;
+    Matrix X;
+    Matrix A;
+    Matrix D;
+    Matrix W;
+
+    getDimension(fileName, &n, &d);
+
+    X = readData(fileName, n, d);
+    A = sym(X);
+    D = ddg(A);
+    W = norm(D, A);
+
+
+        freeMatrix(X);
+        freeMatrix(A);
+        freeMatrix(D);
+        freeMatrix(W);
+
+    if (strcmp(goal,"sym") == 0){
+        return(A);
+    }
+    else if (strcmp(goal,"ddg") == 0){
+        return(D);
+    }
+    else if (strcmp(goal,"norm") == 0){
+        return(W);
+    }
+    else {
+        return X;
+    }
+}
+
 int main(int argc, char *argv[]) {
     int n, d;
     Matrix X;
