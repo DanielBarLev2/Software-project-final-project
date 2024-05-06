@@ -8,12 +8,6 @@
 
 #define MAX_ROW_LEN 1024
 
-void getDimension(const char *fileName, int* n, int* d);
-Matrix readData(const char* filename, int n, int d);
-Matrix sym(Matrix X);
-Matrix ddg(Matrix A);
-Matrix norm(Matrix D, Matrix A);
-
 
 void getDimension(const char *fileName, int* n, int* d) {
     FILE *file;

@@ -42,7 +42,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
 }
 
 /* C function wrapper for symnmf */
-static PyObject* symnmf_goal(PyObject* self, PyObject* args) {
+static PyObject* symnmf_c(PyObject* self, PyObject* args) {
     char *goal, *fileName;
     PyObject *pyOutputMatrixObj;
     Matrix outputMatrix;
@@ -63,8 +63,8 @@ static PyObject* symnmf_goal(PyObject* self, PyObject* args) {
 
 /* Method definitions */
 static PyMethodDef symnmfMethods[] = {
-    {"getGoal",
-      (PyCFunction) symnmf_goal,
+    {"symnmf_c",
+      (PyCFunction) symnmf_c,
       METH_VARARGS,
       PyDoc_STR("C implementation to symmetry matrix non-negative matrix factorization.\n\n"
                 "Arguments:\n"

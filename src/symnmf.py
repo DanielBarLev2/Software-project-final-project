@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
-import sym 
+import mysymnmf
 
 
 def sys_arguments():
@@ -21,7 +21,7 @@ def sys_arguments():
     :return: k, goal, file_name
     """
     k, goal, file_name = None, None, None
-
+    
     if len(sys.argv) != 4:
         raise ValueError(len(sys.argv), " are not enough cmd arguments")
 
@@ -120,14 +120,6 @@ if __name__ == "__main__":
     k, goal, file_name = sys_arguments()
 
     x = read_data(file_name=file_name)
-    n, d = x.shape
-    A = similarity_matrix(X=x, n=n)
-    D = diag_degree_matrix(A=A)
-    W = normalized_similarity_matrix(A=A, D=D)
-    H = h_initialization(k=4,n=n, m=0.5)
-
-    print(A)
-    print(D)
-    print(W)
+    n, d = x.shape    
 
     print("Done ")
