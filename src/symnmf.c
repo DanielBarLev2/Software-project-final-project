@@ -143,29 +143,35 @@ Matrix symnmf(char *goal, char *fileName){
     getDimension(fileName, &n, &d);
 
     X = readData(fileName, n, d);
-    A = sym(X);
-    D = ddg(A);
-    W = norm(D, A);
-
-
-        freeMatrix(X);
-        freeMatrix(A);
-        freeMatrix(D);
-        freeMatrix(W);
 
     if (strcmp(goal,"sym") == 0){
+        A = sym(X);
+        freeMatrix(A);
+        freeMatrix(X);
         return(A);
     }
-    else if (strcmp(goal,"ddg") == 0){
+    if (strcmp(goal,"ddg") == 0){
+        A = sym(X);
+        D = ddg(A);
+        freeMatrix(D);
+        freeMatrix(A);
+        freeMatrix(X);
         return(D);
     }
-    else if (strcmp(goal,"norm") == 0){
+    if (strcmp(goal,"norm") == 0){
+        A = sym(X);
+        D = ddg(A);
+        W = norm(D, A);
+        freeMatrix(W);
+        freeMatrix(D);
+        freeMatrix(A);
+        freeMatrix(X);
         return(W);
     }
-    else {
-        return X;
-    }
+
+    return X;
 }
+
 
 int main(int argc, char *argv[]) {
     int n, d;
