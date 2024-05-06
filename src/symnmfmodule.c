@@ -63,7 +63,7 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
 
 /* Method definitions */
 static PyMethodDef myModule_methods[] = {
-    {"symnmf",
+    {"symnmfModule",
       (PyCFunction) symnmf_c,
       METH_VARARGS,
       PyDoc_STR("C implementation to symmetry matrix non-negative matrix factorization.\n\n"
@@ -80,7 +80,7 @@ static PyMethodDef myModule_methods[] = {
 /* Module initialization */
 static struct PyModuleDef myModule_definition = {
     PyModuleDef_HEAD_INIT,
-    "symnmf",
+    "symnmfModule",
     "A Python module that implements symmetry matrix non-negative matrix factorization.",
     -1,
     myModule_methods
