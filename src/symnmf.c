@@ -8,17 +8,7 @@
 
 #define MAX_ROW_LEN 1024
 
-/**
- * @brief Get the dimensions of the data matrix from a file.
- *
- * This function reads a file and calculates the number of rows (n) and columns (d)
- * in the data matrix. The file is expected to be a text file where each row represents
- * a data record and each value is separated by whitespace (spaces or tabs).
- *
- * @param fileName The name of the file to read.
- * @param n Pointer to number of ROWS.
- * @param d Pointer to number of COLUMNS.
- */
+
 void getDimension(const char *fileName, int* n, int* d) {
     FILE *file;
     char line[MAX_ROW_LEN];
@@ -174,6 +164,51 @@ Matrix symnmf(char *goal, char *fileName){
     }
 
     return X;
+}
+
+
+Matrix converge_H(Matrix H, Matrix W, double eps, int *iter){
+    Matrix H_current = H;
+    Matrix H_new;
+    int i, j, k;
+
+    printf("YAYYYYY");
+
+
+    for (k = 0; k < *iter; k++) {
+        H_new = update_H(H_current, H_new, W, eps);
+
+        if (frobeniusNorm(H_current, H_new) < eps){
+            printf("Converged after %d iterations.\n", k + 1);
+            break;
+        }
+
+        freeMatrix(H_current);
+        H_current = H_new;
+    }
+
+    return H_new;
+}
+
+
+Matrix update_H(Matrix H, Matrix H_new, Matrix W, double eps){
+    Matrix H_new = createZeroMatrix(H.rows, H.cols);
+    Matrix numerator = multiplyMatrix(W, H);
+    Matrix denominator = multiplyMatrix(multiplyMatrix(H, transposeMatrix(H)), H);
+    double beta = 0.5;
+    int i, j;
+
+    for (i = 0; i < numerator.rows; i++){
+         for (j = 0; j < numerator.cols; j++){
+            H_new.data[i][j] = 
+            H.data[i][j] * (1 - beta + (beta * (numerator.data[i][j] / denominator.data[i][j])));
+        }
+    }
+
+    freeMatrix(numerator);
+    freeMatrix(denominator);
+
+    return H_new;
 }
 
 

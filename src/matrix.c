@@ -192,3 +192,31 @@ Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
 
     return result;
 }
+
+Matrix transposeMatrix(Matrix matrix) {
+    Matrix result;
+    int i, j;
+
+    result = createMatrix(matrix.cols, matrix.rows, NULL);
+
+    for (i = 0; i < matrix.rows; i++) {
+        for (j = 0; j < matrix.cols; j++) {
+            result.data[j][i] = matrix.data[i][j];
+        }
+    }
+
+    return result;
+}
+
+
+double frobeniusNorm(Matrix matrix1, Matrix matrix2) {
+    double norm = 0.0;
+    int i, j;
+    for (i = 0; i < matrix1.rows; i++) {
+        for (j = 0; j < matrix1.cols; j++) {
+            double diff = matrix1.data[i][j] - matrix2.data[i][j];
+            norm += diff * diff;
+        }
+    }
+    return sqrt(norm);
+}
