@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "symnmf.c"
 
+
 /* Function to convert Matrix to Python object */
 static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
     int i, j;
@@ -62,7 +63,7 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
 }
 
 /* Method definitions */
-static PyMethodDef symnmfMethods[] = {
+static PyMethodDef methods[] = {
     {"symnmf_c",
       (PyCFunction) symnmf_c,
       METH_VARARGS,
@@ -80,18 +81,13 @@ static PyMethodDef symnmfMethods[] = {
 /* Module initialization */
 static struct PyModuleDef symnmfmoudle = {
     PyModuleDef_HEAD_INIT,
-    "symnmfModule",
+    "mysymnmf",
     "A Python module that implements symmetry matrix non-negative matrix factorization.",
     -1,
-    symnmfMethods
+    methods
 };
 
 /* Module initialization function */
-PyMODINIT_FUNC PyInit_sym(void) {
-    PyObject *m;
-    m = PyModule_Create(&symnmfmoudle);
-    if (!m) {
-        return NULL; /* Module creation failed */
-    }
-    return m;
+PyMODINIT_FUNC PyInit_mysymnmf() {
+    return PyModule_Create(&symnmfmoudle);
 }

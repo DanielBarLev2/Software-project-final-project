@@ -115,11 +115,25 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    # file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
+     
     # file_name = "C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt"
     k, goal, file_name = sys_arguments()
 
+    # file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
     x = read_data(file_name=file_name)
     n, d = x.shape    
 
-    print("Done ")
+    # @todo: implement logic for goal selection and ouput.
+
+    A1 = similarity_matrix(x, n)
+
+    print(A1)
+    # A1 = diag_degree_matrix(A1)
+    # A2 = mysymnmf.symnmf_c("ddg", file_name)
+
+    print("Done with no errors :)")
+    
+    
+    
+    
+    

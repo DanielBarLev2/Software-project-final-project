@@ -8,7 +8,17 @@
 
 #define MAX_ROW_LEN 1024
 
-
+/**
+ * @brief Get the dimensions of the data matrix from a file.
+ *
+ * This function reads a file and calculates the number of rows (n) and columns (d)
+ * in the data matrix. The file is expected to be a text file where each row represents
+ * a data record and each value is separated by whitespace (spaces or tabs).
+ *
+ * @param fileName The name of the file to read.
+ * @param n Pointer to number of ROWS.
+ * @param d Pointer to number of COLUMNS.
+ */
 void getDimension(const char *fileName, int* n, int* d) {
     FILE *file;
     char line[MAX_ROW_LEN];
@@ -180,9 +190,6 @@ int main(int argc, char *argv[]) {
         goal = argv[1];
         fileName = argv[2];
     }
-        
-    goal = "norm";
-    fileName = "C:/Tau/Software-Project/Software-project-final-project/data/input_7.txt";
 
     getDimension(fileName, &n, &d);
 
