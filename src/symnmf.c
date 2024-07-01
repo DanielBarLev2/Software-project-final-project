@@ -167,48 +167,42 @@ Matrix symnmf(char *goal, char *fileName){
 }
 
 
-Matrix converge_H(Matrix H, Matrix W, double eps, int *iter){
-    Matrix H_current = H;
-    Matrix H_new;
-    int i, j, k;
+void update_H(Matrix H_current, Matrix H_new, Matrix W) {
+    Matrix nominator = multiplyMatrix(W, H_current);
+    Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, H_current), H_current);
+    double beta = 0.5;
 
-    printf("YAYYYYY");
-
-
-    for (k = 0; k < *iter; k++) {
-        H_new = update_H(H_current, H_new, W, eps);
-
-        if (frobeniusNorm(H_current, H_new) < eps){
-            printf("Converged after %d iterations.\n", k + 1);
-            break;
+    for (int i = 0; i < H_current.rows; i++) {
+        for (int j = 0; j < H_current.cols; j++) {
+            H_new.data[i][j] = H_current.data[i][j] * (1 - beta + beta * (nominator.data[i][j] / denominator.data[i][j]));
         }
-
-        freeMatrix(H_current);
-        H_current = H_new;
     }
 
-    return H_new;
+    freeMatrix(nominator);
+    freeMatrix(denominator);
 }
 
 
-Matrix update_H(Matrix H, Matrix H_new, Matrix W, double eps){
+Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
-    Matrix numerator = multiplyMatrix(W, H);
-    Matrix denominator = multiplyMatrix(multiplyMatrix(H, transposeMatrix(H)), H);
-    double beta = 0.5;
-    int i, j;
+    Matrix H_current = H;
+    Matrix temp;
+    int i, j, k;
 
-    for (i = 0; i < numerator.rows; i++){
-         for (j = 0; j < numerator.cols; j++){
-            H_new.data[i][j] = 
-            H.data[i][j] * (1 - beta + (beta * (numerator.data[i][j] / denominator.data[i][j])));
+    for (k = 0; k < iter; k++) {
+        update_H(H_current, H_new, W);
+        if (frobeniusNorm(H_new, H_current) < eps) {
+            printf("Converged after %d iterations.\n", k + 1);
+            break;
         }
+        temp = H_current;
+        H_current = H_new;
+        H_new = temp;
     }
 
-    freeMatrix(numerator);
-    freeMatrix(denominator);
+    freeMatrix(H_new);
 
-    return H_new;
+    return H_current;
 }
 
 
@@ -240,6 +234,7 @@ int main(int argc, char *argv[]) {
                 W = norm(D, A);
             }
         }
+
 
         printf("current test for matrix:\n");
         printMatrix(X);
