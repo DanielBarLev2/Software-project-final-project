@@ -1,66 +1,58 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <numpy/arrayobject.h> 
-
+#include <numpy/arrayobject.h>
 #include "matrix.h"
 #include "symnmf.c"
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-/* Function to convert NumPy array to Matrix structure */
 static Matrix convert_numpy_to_matrix(PyArrayObject *array) {
     int rows = (int)PyArray_DIM(array, 0);
     int cols = (int)PyArray_DIM(array, 1);
-    int i, j;
     Matrix matrix;
     matrix.rows = rows;
     matrix.cols = cols;
     matrix.data = (double **)malloc(rows * sizeof(double *));
-
     if (matrix.data == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix rows.");
+        matrix.rows = 0;
+        matrix.cols = 0;
         return matrix;
     }
-
-    for (i = 0; i < rows; ++i) {
+    for (int i = 0; i < rows; ++i) {
         matrix.data[i] = (double *)malloc(cols * sizeof(double));
         if (matrix.data[i] == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix columns.");
-            freeMatrix(matrix); // Cleanup already allocated rows
+            for (int j = 0; j < i; ++j) {
+                free(matrix.data[j]);
+            }
+            free(matrix.data);
             matrix.rows = 0;
+            matrix.cols = 0;
             return matrix;
         }
-        for (j = 0; j < cols; ++j) {
+        for (int j = 0; j < cols; ++j) {
             matrix.data[i][j] = *(double *)PyArray_GETPTR2(array, i, j);
         }
     }
-
     return matrix;
 }
 
-
-/* Function to convert Matrix to Python object */
 static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
-    int i, j;
-    PyObject *pyOutputMatrixObj, *pyRow, *pyValue;
-
-    pyOutputMatrixObj = PyList_New(outputMatrix.rows);
+    PyObject *pyOutputMatrixObj = PyList_New(outputMatrix.rows);
     if (!pyOutputMatrixObj) {
         PyErr_SetString(PyExc_RuntimeError, "Unable to create Python list for matrix.");
         return NULL;
     }
-
-    for (i = 0; i < outputMatrix.rows; ++i) {
-        pyRow = PyList_New(outputMatrix.cols);
+    for (int i = 0; i < outputMatrix.rows; ++i) {
+        PyObject *pyRow = PyList_New(outputMatrix.cols);
         if (!pyRow) {
             Py_DECREF(pyOutputMatrixObj);
             PyErr_SetString(PyExc_RuntimeError, "Unable to create Python list for row.");
             return NULL;
         }
-
-        for (j = 0; j < outputMatrix.cols; ++j) {
-            pyValue = PyFloat_FromDouble(outputMatrix.data[i][j]);
+        for (int j = 0; j < outputMatrix.cols; ++j) {
+            PyObject *pyValue = PyFloat_FromDouble(outputMatrix.data[i][j]);
             if (!pyValue) {
                 Py_DECREF(pyOutputMatrixObj);
                 Py_DECREF(pyRow);
@@ -71,12 +63,9 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
         }
         PyList_SET_ITEM(pyOutputMatrixObj, i, pyRow);
     }
-
     return pyOutputMatrixObj;
 }
 
-
-/* C function wrapper for converge_H */
 static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     PyObject *h_obj, *w_obj;
     PyArrayObject *h_array, *w_array;
@@ -84,14 +73,12 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     int iter;
     Matrix h_matrix, w_matrix, result_matrix;
 
-    /* Parse arguments */
     if (!PyArg_ParseTuple(args, "OOdi", &h_obj, &w_obj, &eps, &iter)) {
-        return NULL; /* Parsing error */
+        return NULL;
     }
 
-    /* Convert NumPy arrays to Matrix */
-    h_array = PyArray_FROM_OTF(h_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
-    w_array = PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    h_array = (PyArrayObject *)PyArray_FROM_OTF(h_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    w_array = (PyArrayObject *)PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (h_array == NULL || w_array == NULL) {
         Py_XDECREF(h_array);
         Py_XDECREF(w_array);
@@ -102,68 +89,85 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     h_matrix = convert_numpy_to_matrix(h_array);
     w_matrix = convert_numpy_to_matrix(w_array);
 
-    /* Call converge_H function from symnmf.c */
-    result_matrix = converge_H(h_matrix, w_matrix, eps, &iter);
+    result_matrix = converge_H(h_matrix, w_matrix, eps, iter);
 
-    /* Convert Matrix to NumPy array */
-    PyObject *pyResultObj = convert_matrix_to_numpy(result_matrix);
+    PyObject *pyResultObj = convert_matrix_to_python(result_matrix);
 
-    /* Free allocated memory for Matrices */
     freeMatrix(h_matrix);
     freeMatrix(w_matrix);
     freeMatrix(result_matrix);
 
+    Py_DECREF(h_array);
+    Py_DECREF(w_array);
+
     return pyResultObj;
 }
 
-
-
-/* C function wrapper for symnmf */
 static PyObject* symnmf_c(PyObject* self, PyObject* args) {
-    char *goal, *fileName;
+    char *goal;
+    PyObject *x_obj;
+    PyArrayObject *x_array;
     PyObject *pyOutputMatrixObj;
-    Matrix outputMatrix;
+    Matrix outputMatrix, x_matrix;
+    Matrix sym_matrix;
 
-    /* Parse arguments */
-    if (!PyArg_ParseTuple(args, "ss", &goal, &fileName)) {
-        return NULL; /* Parsing error */
+    if (!PyArg_ParseTuple(args, "sO", &goal, &x_obj)) {
+        return NULL;
     }
-    
-    /* Call symnmf function */
-    outputMatrix = symnmf(goal, fileName);
 
-    /* Convert Matrix to Python object */
+    x_array = (PyArrayObject *)PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (x_array == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Failed to convert input to NumPy array.");
+        return NULL;
+    }
+
+    x_matrix = convert_numpy_to_matrix(x_array);
+
+    if (strcmp(goal, "sym") == 0) {
+        outputMatrix = sym(x_matrix);
+    }
+    else if (strcmp(goal, "ddg") == 0) {
+        sym_matrix = sym(x_matrix);
+        outputMatrix = ddg(sym_matrix);
+        freeMatrix(sym_matrix);
+    } 
+    else if (strcmp(goal, "norm") == 0) {
+        sym_matrix = sym(x_matrix);
+        outputMatrix = norm(ddg(sym_matrix), sym_matrix);
+        freeMatrix(sym_matrix);
+    } 
+    else {
+        PyErr_SetString(PyExc_ValueError, "Invalid goal. Expected 'sym', 'ddg', or 'norm'.");
+        freeMatrix(x_matrix);
+        Py_DECREF(x_array);
+        return NULL;
+    }
+
     pyOutputMatrixObj = convert_matrix_to_python(outputMatrix);
+
+    freeMatrix(x_matrix);
+    freeMatrix(outputMatrix);
+
+    Py_DECREF(x_array);
 
     return pyOutputMatrixObj;
 }
 
-/* Method definitions */
 static PyMethodDef methods[] = {
-    {"symnmf_c",
-      (PyCFunction) symnmf_c,
-      METH_VARARGS,
-      PyDoc_STR("C implementation to symmetry matrix non-negative matrix factorization.\n\n"
-                "Arguments:\n"
-                "goal (str): i. sym: Calculate and output the similarity matrix.\n"
-                            "ii. ddg: Calculate and output the Diagonal Degree Matrix.\n"
-                            "iii. norm: Calculate and output the normalized similarity matrix.\n"
-                "fileName (str): The filename.\n\n"
-                "Returns:\n"
-                "list: The output matrix as a nested Python list.")},
+    {"symnmf_c", (PyCFunction)symnmf_c, METH_VARARGS, "C implementation of symmetric non-negative matrix factorization."},
+    {"converge_h_c", (PyCFunction)converge_h_c, METH_VARARGS, "Converge H using C implementation."},
     {NULL, NULL, 0, NULL}
 };
 
-/* Module initialization */
-static struct PyModuleDef symnmfmoudle = {
+static struct PyModuleDef symnmfmodule = {
     PyModuleDef_HEAD_INIT,
     "mysymnmf",
-    "A Python module that implements symmetry matrix non-negative matrix factorization.",
+    "Symmetric Non-negative Matrix Factorization",
     -1,
     methods
 };
 
-/* Module initialization function */
-PyMODINIT_FUNC PyInit_mysymnmf() {
-    return PyModule_Create(&symnmfmoudle);
+PyMODINIT_FUNC PyInit_mysymnmf(void) {
+    import_array(); // For NumPy
+    return PyModule_Create(&symnmfmodule);
 }

@@ -187,7 +187,7 @@ Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
     Matrix H_current = H;
     Matrix temp;
-    int i, j, k;
+    int k;
 
     for (k = 0; k < iter; k++) {
         update_H(H_current, H_new, W);
@@ -234,7 +234,6 @@ int main(int argc, char *argv[]) {
                 W = norm(D, A);
             }
         }
-
 
         printf("current test for matrix:\n");
         printMatrix(X);

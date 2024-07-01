@@ -147,15 +147,15 @@ double sumColumn(Matrix matrix, int col) {
 }
 
 
-double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
-    double sum = 0.0;
-    int i;
-    for (i = 0; i < size; i++) {
-        double diff = vector1[i] - vector2[i];
-        sum += diff * diff;
+    double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
+        double sum = 0.0;
+        int i;
+        for (i = 0; i < size; i++) {
+            double diff = vector1[i] - vector2[i];
+            sum += diff * diff;
+        }
+        return sum;
     }
-    return sum;
-}
 
 
 Matrix powerDiagMatrix(Matrix matrix, double power) {

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
-import mysymnmf
+import mysymnmf as symnmf
 
 
 def sys_arguments():
@@ -114,22 +114,72 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     return h
 
 
+def calculate_similarity(matrix1, matrix2):
+    """
+    Calculate the similarity between two matrices by value up to 4 digits and return it as a percentage.
+
+    Parameters:
+    - matrix1: First matrix (list of lists or numpy array)
+    - matrix2: Second matrix (list of lists or numpy array)
+
+    Returns:
+    - similarity_percentage: Similarity percentage between the two matrices
+    """
+    # Convert lists to numpy arrays if they are not already
+    if not isinstance(matrix1, np.ndarray):
+        matrix1 = np.array(matrix1)
+    if not isinstance(matrix2, np.ndarray):
+        matrix2 = np.array(matrix2)
+
+    # Check if matrices have the same shape
+    if matrix1.shape != matrix2.shape:
+        raise ValueError("Matrices must have the same shape to calculate similarity.")
+
+    # Round the matrices to 4 decimal places
+    matrix1_rounded = np.round(matrix1, 4)
+    matrix2_rounded = np.round(matrix2, 4)
+
+    # Compare element-wise and calculate the number of similar elements
+    similar_elements = np.sum(matrix1_rounded == matrix2_rounded)
+    total_elements = matrix1.size
+
+    # Calculate similarity percentage
+    similarity_percentage = (similar_elements / total_elements) * 100
+
+    return similarity_percentage
+
+
 if __name__ == "__main__":
      
     # file_name = "C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt"
     k, goal, file_name = sys_arguments()
 
-    # file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
+    file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
     x = read_data(file_name=file_name)
     n, d = x.shape    
 
     # @todo: implement logic for goal selection and ouput.
 
     A1 = similarity_matrix(x, n)
-
-    print(A1)
-    # A1 = diag_degree_matrix(A1)
-    # A2 = mysymnmf.symnmf_c("ddg", file_name)
+    D1 = diag_degree_matrix(A1)
+    W1 = normalized_similarity_matrix(A1, D1)
+    
+    A2, D2, W2 = 0, 0, 0
+               
+    A2 = symnmf.symnmf_c('sym', x)
+    D2 = symnmf.symnmf_c('ddg', x)
+    W2 = symnmf.symnmf_c('norm', x)
+    
+    H = h_initialization(k=3, n=n, m=8)
+    print(H)
+    H = symnmf.converge_h_c(H, W1, 0.1, 1)
+    print(H)
+    
+    print("\n\n\n\n")
+    
+    print(f'A sim: {calculate_similarity(A1, A2)}')
+    print(f'D sim: {calculate_similarity(D1, D2)}')
+    print(f'W sim: {calculate_similarity(W1, W2)}')
 
     print("Done with no errors :)")
     

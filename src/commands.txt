@@ -20,8 +20,8 @@ choose file_name (.txt ): The path to the Input file,
  it will contain N data points for all above goals, the file extension is .txt.
 
 Run in CMD: gcc symnmf.c -o sym -lm
-            ./sym norm /a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt
+./sym norm /a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt
 
 
-python setup.py build_ext --inplace
+python3 setup.py build_ext --inplace
 
