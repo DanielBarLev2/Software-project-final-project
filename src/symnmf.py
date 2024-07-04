@@ -114,6 +114,45 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     return h
 
 
+def update_H_until_convergence(W, H, beta=0.5, max_iterations=100, epsilon=1e-5):
+    """
+    Update H using the given rule until convergence criteria are met.
+
+    Args:
+    - W: Matrix W (numpy array)
+    - H: Initial matrix H (numpy array)
+    - beta: Update parameter (default is 0.5)
+    - max_iterations: Maximum number of iterations (default is 100)
+    - epsilon: Convergence threshold (default is 1e-5)
+
+    Returns:
+    - Updated matrix H after convergence or reaching max iterations.
+    """
+    prev_H = H.copy()
+    for t in range(max_iterations):
+        WH = np.dot(W, H)
+        HHTH = np.dot(np.dot(H, H.T), H)
+        H = H * (1 - beta + beta * (WH / HHTH))
+
+        # Check convergence criteria
+        diff_norm = np.linalg.norm(H - prev_H, 'fro')  # Frobenius norm
+        if diff_norm < epsilon:
+            print(f"Converged after {t+1} iterations.")
+            break
+
+        prev_H = H.copy()
+
+    else:
+        print(f"Warning: Max iterations ({max_iterations}) reached without convergence.")
+
+    return H
+
+
+def print_np_list(np_list):
+    for row in np_list:
+        print(" ".join(f"{value:.4f}" for value in row))
+        
+
 def calculate_similarity(matrix1, matrix2):
     """
     Calculate the similarity between two matrices by value up to 4 digits and return it as a percentage.
@@ -160,26 +199,34 @@ if __name__ == "__main__":
 
     # @todo: implement logic for goal selection and ouput.
 
-    A1 = similarity_matrix(x, n)
-    D1 = diag_degree_matrix(A1)
-    W1 = normalized_similarity_matrix(A1, D1)
+    Apy = similarity_matrix(x, n)
+    Dpy = diag_degree_matrix(Apy)
+    Wpy = normalized_similarity_matrix(Apy, Dpy)
     
     A2, D2, W2 = 0, 0, 0
                
-    A2 = symnmf.symnmf_c('sym', x)
-    D2 = symnmf.symnmf_c('ddg', x)
-    W2 = symnmf.symnmf_c('norm', x)
+    A = symnmf.symnmf_c('sym', x)
+    D = symnmf.symnmf_c('ddg', x)
+    W = symnmf.symnmf_c('norm', x)
     
-    H = h_initialization(k=3, n=n, m=8)
-    print(H)
-    H = symnmf.converge_h_c(H, W1, 0.1, 1)
-    print(H)
+    H_init = h_initialization(k=2, n=n, m=np.mean(W))
+    print("\n\ninit run: ")
+    print_np_list(H_init)
+    
+    H = symnmf.converge_h_c(H_init, W, 0.1, 100)
+    print("\n\nC: ")
+    print_np_list(H)
+    
+    Hpy = update_H_until_convergence(Wpy, H_init, 0.5, 100, 0.1)
+    print("\n\nPy: ",)
+    print_np_list(H)
     
     print("\n\n\n\n")
     
-    print(f'A sim: {calculate_similarity(A1, A2)}')
-    print(f'D sim: {calculate_similarity(D1, D2)}')
-    print(f'W sim: {calculate_similarity(W1, W2)}')
+    print(f'A sim: {calculate_similarity(Apy, A)}')
+    print(f'D sim: {calculate_similarity(Dpy, D)}')
+    print(f'W sim: {calculate_similarity(Wpy, W)}')
+    print(f'H sim: {calculate_similarity(Hpy, H)}')
 
     print("Done with no errors :)")
     

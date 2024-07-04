@@ -10,27 +10,35 @@ static Matrix convert_numpy_to_matrix(PyArrayObject *array) {
     int rows = (int)PyArray_DIM(array, 0);
     int cols = (int)PyArray_DIM(array, 1);
     Matrix matrix;
+
     matrix.rows = rows;
     matrix.cols = cols;
     matrix.data = (double **)malloc(rows * sizeof(double *));
+
     if (matrix.data == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix rows.");
         matrix.rows = 0;
         matrix.cols = 0;
         return matrix;
     }
+
     for (int i = 0; i < rows; ++i) {
         matrix.data[i] = (double *)malloc(cols * sizeof(double));
         if (matrix.data[i] == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix columns.");
+        
             for (int j = 0; j < i; ++j) {
                 free(matrix.data[j]);
             }
+
             free(matrix.data);
+
             matrix.rows = 0;
             matrix.cols = 0;
+
             return matrix;
         }
+
         for (int j = 0; j < cols; ++j) {
             matrix.data[i][j] = *(double *)PyArray_GETPTR2(array, i, j);
         }
@@ -40,10 +48,12 @@ static Matrix convert_numpy_to_matrix(PyArrayObject *array) {
 
 static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
     PyObject *pyOutputMatrixObj = PyList_New(outputMatrix.rows);
+
     if (!pyOutputMatrixObj) {
         PyErr_SetString(PyExc_RuntimeError, "Unable to create Python list for matrix.");
         return NULL;
     }
+    
     for (int i = 0; i < outputMatrix.rows; ++i) {
         PyObject *pyRow = PyList_New(outputMatrix.cols);
         if (!pyRow) {
@@ -54,8 +64,12 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
         for (int j = 0; j < outputMatrix.cols; ++j) {
             PyObject *pyValue = PyFloat_FromDouble(outputMatrix.data[i][j]);
             if (!pyValue) {
-                Py_DECREF(pyOutputMatrixObj);
+                // Cleanup previously allocated objects
                 Py_DECREF(pyRow);
+                for (int k = 0; k < i; ++k) {
+                    Py_DECREF(PyList_GET_ITEM(pyOutputMatrixObj, k));
+                }
+                Py_DECREF(pyOutputMatrixObj);
                 PyErr_SetString(PyExc_RuntimeError, "Unable to convert double to Python float.");
                 return NULL;
             }
@@ -67,31 +81,51 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
 }
 
 static PyObject* converge_h_c(PyObject* self, PyObject* args) {
+    Matrix h_matrix = {0}, w_matrix = {0}, result_matrix = {0};
+    PyArrayObject *h_array = NULL, *w_array = NULL;
     PyObject *h_obj, *w_obj;
-    PyArrayObject *h_array, *w_array;
+    PyObject *pyResultObj = NULL;
     double eps;
     int iter;
-    Matrix h_matrix, w_matrix, result_matrix;
-
+    
     if (!PyArg_ParseTuple(args, "OOdi", &h_obj, &w_obj, &eps, &iter)) {
         return NULL;
     }
 
     h_array = (PyArrayObject *)PyArray_FROM_OTF(h_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     w_array = (PyArrayObject *)PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+
     if (h_array == NULL || w_array == NULL) {
+        PyErr_SetString(PyExc_TypeError, "Failed to convert input to NumPy arrays.");
         Py_XDECREF(h_array);
         Py_XDECREF(w_array);
-        PyErr_SetString(PyExc_TypeError, "Failed to convert input to NumPy arrays.");
         return NULL;
     }
 
     h_matrix = convert_numpy_to_matrix(h_array);
     w_matrix = convert_numpy_to_matrix(w_array);
 
+    if (h_matrix.data == NULL || w_matrix.data == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to convert NumPy arrays to Matrix.");
+        freeMatrix(h_matrix);
+        freeMatrix(w_matrix);
+        Py_DECREF(h_array);
+        Py_DECREF(w_array);
+        return NULL;
+    }
+
     result_matrix = converge_H(h_matrix, w_matrix, eps, iter);
 
-    PyObject *pyResultObj = convert_matrix_to_python(result_matrix);
+    if (result_matrix.data == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to converge matrices.");
+        freeMatrix(h_matrix);
+        freeMatrix(w_matrix);
+        Py_DECREF(h_array);
+        Py_DECREF(w_array);
+        return NULL;
+    }
+
+    pyResultObj = convert_matrix_to_python(result_matrix);
 
     freeMatrix(h_matrix);
     freeMatrix(w_matrix);
@@ -99,6 +133,10 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
 
     Py_DECREF(h_array);
     Py_DECREF(w_array);
+
+    if (pyResultObj == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to convert result matrix to Python object.");
+    }
 
     return pyResultObj;
 }

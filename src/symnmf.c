@@ -140,36 +140,35 @@ Matrix symnmf(char *goal, char *fileName){
 
     if (strcmp(goal,"sym") == 0){
         A = sym(X);
-        freeMatrix(A);
-        freeMatrix(X);
-        return(A);
+        freeMatrix(X);  // Free X before returning A
+        return A;
     }
     if (strcmp(goal,"ddg") == 0){
         A = sym(X);
         D = ddg(A);
-        freeMatrix(D);
-        freeMatrix(A);
-        freeMatrix(X);
-        return(D);
+        freeMatrix(X);  // Free X before returning D
+        freeMatrix(A);  // Free A before returning D
+        return D;
     }
     if (strcmp(goal,"norm") == 0){
         A = sym(X);
         D = ddg(A);
         W = norm(D, A);
-        freeMatrix(W);
-        freeMatrix(D);
-        freeMatrix(A);
-        freeMatrix(X);
-        return(W);
+        freeMatrix(X);  // Free X before returning W
+        freeMatrix(A);  // Free A before returning W
+        freeMatrix(D);  // Free D before returning W
+        return W;
     }
 
+    freeMatrix(X);
     return X;
 }
 
 
+
 void update_H(Matrix H_current, Matrix H_new, Matrix W) {
     Matrix nominator = multiplyMatrix(W, H_current);
-    Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, H_current), H_current);
+    Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, transposeMatrix(H_current)), H_current);
     double beta = 0.5;
 
     for (int i = 0; i < H_current.rows; i++) {
@@ -181,7 +180,6 @@ void update_H(Matrix H_current, Matrix H_new, Matrix W) {
     freeMatrix(nominator);
     freeMatrix(denominator);
 }
-
 
 Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
@@ -200,11 +198,8 @@ Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
         H_new = temp;
     }
 
-    freeMatrix(H_new);
-
     return H_current;
 }
-
 
 int main(int argc, char *argv[]) {
     int n, d;
@@ -237,7 +232,7 @@ int main(int argc, char *argv[]) {
 
         printf("current test for matrix:\n");
         printMatrix(X);
-        freeMatrix(X);
+        freeMatrix(X);  // X is freed here
 
         if (strcmp(goal,"sym") == 0){
             printMatrix(A);
@@ -254,3 +249,5 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
+
