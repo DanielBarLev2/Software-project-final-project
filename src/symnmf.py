@@ -1,6 +1,5 @@
-import pandas as pd
-import numpy as np
 import sys
+import numpy as np
 import mysymnmf as symnmf
 
 
@@ -151,7 +150,7 @@ def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
 
 def print_np_list(np_list):
     for row in np_list:
-        print(" ".join(f"{value:.4f}" for value in row))
+        print(",".join(f"{value:.4f}" for value in row))
         
 
 def calculate_similarity(matrix1, matrix2):
@@ -191,10 +190,8 @@ def calculate_similarity(matrix1, matrix2):
 
 if __name__ == "__main__":
      
-    # file_name = "C:\Tau\Software-Project\Software-project-final-project\data\input_7.txt"
     k, goal, file_name = sys_arguments()
-
-    file_name = "/a/home/cc/students/cs/danielbarlev/Software-project-final-project/data/input_7.txt"
+    
     x = read_data(file_name=file_name)
     n, d = x.shape    
 
@@ -214,15 +211,17 @@ if __name__ == "__main__":
     print("\n\ninit run: ")
     print_np_list(H_init)
     
+    input("??")
+    
     print("\n\nPy: ",)
     Hpy = update_H_until_convergence(H_init, Wpy, 0.001, 100)
     print_np_list(Hpy)
     
+    input("??")
+    
     print("\n\nC: ")
     H = symnmf.converge_h_c(H_init, W, 0.001, 100)
     print_np_list(H)
-    
-   
     
     print("\n\n\n\n")
     
