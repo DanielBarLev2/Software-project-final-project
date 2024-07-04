@@ -166,9 +166,10 @@ Matrix symnmf(char *goal, char *fileName){
 
 
 
-void update_H(Matrix H_current, Matrix H_new, Matrix W) {
+Matrix update_H(Matrix H_current, Matrix W) {
     Matrix nominator = multiplyMatrix(W, H_current);
     Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, transposeMatrix(H_current)), H_current);
+    Matrix H_new = createZeroMatrix(H_current.rows, H_current.cols);
     double beta = 0.5;
 
     for (int i = 0; i < H_current.rows; i++) {
@@ -179,26 +180,25 @@ void update_H(Matrix H_current, Matrix H_new, Matrix W) {
 
     freeMatrix(nominator);
     freeMatrix(denominator);
+
+    return H_new;
 }
+
 
 Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
-    Matrix H_current = H;
-    Matrix temp;
     int k;
 
     for (k = 0; k < iter; k++) {
-        update_H(H_current, H_new, W);
-        if (frobeniusNorm(H_new, H_current) < eps) {
+        H_new = update_H(H, W);
+        if (frobeniusNorm(H_new, H) < eps) {
             printf("Converged after %d iterations.\n", k + 1);
             break;
         }
-        temp = H_current;
-        H_current = H_new;
-        H_new = temp;
+        H = H_new;
     }
 
-    return H_current;
+    return H_new;
 }
 
 int main(int argc, char *argv[]) {
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
 
         printf("current test for matrix:\n");
         printMatrix(X);
-        freeMatrix(X);  // X is freed here
+        freeMatrix(X); 
 
         if (strcmp(goal,"sym") == 0){
             printMatrix(A);

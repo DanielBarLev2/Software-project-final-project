@@ -114,6 +114,7 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
         return NULL;
     }
 
+    printf("converging in c . . .");
     result_matrix = converge_H(h_matrix, w_matrix, eps, iter);
 
     if (result_matrix.data == NULL) {

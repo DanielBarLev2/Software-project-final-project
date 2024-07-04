@@ -114,7 +114,7 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     return h
 
 
-def update_H_until_convergence(W, H, beta=0.5, max_iterations=100, epsilon=1e-5):
+def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
     """
     Update H using the given rule until convergence criteria are met.
 
@@ -128,6 +128,7 @@ def update_H_until_convergence(W, H, beta=0.5, max_iterations=100, epsilon=1e-5)
     Returns:
     - Updated matrix H after convergence or reaching max iterations.
     """
+    beta=0.5
     prev_H = H.copy()
     for t in range(max_iterations):
         WH = np.dot(W, H)
@@ -177,7 +178,7 @@ def calculate_similarity(matrix1, matrix2):
     # Round the matrices to 4 decimal places
     matrix1_rounded = np.round(matrix1, 4)
     matrix2_rounded = np.round(matrix2, 4)
-
+    
     # Compare element-wise and calculate the number of similar elements
     similar_elements = np.sum(matrix1_rounded == matrix2_rounded)
     total_elements = matrix1.size
@@ -209,17 +210,19 @@ if __name__ == "__main__":
     D = symnmf.symnmf_c('ddg', x)
     W = symnmf.symnmf_c('norm', x)
     
-    H_init = h_initialization(k=2, n=n, m=np.mean(W))
+    H_init = h_initialization(k=3, n=n, m=np.mean(W))
     print("\n\ninit run: ")
     print_np_list(H_init)
     
-    H = symnmf.converge_h_c(H_init, W, 0.1, 100)
+    print("\n\nPy: ",)
+    Hpy = update_H_until_convergence(H_init, Wpy, 0.001, 100)
+    print_np_list(Hpy)
+    
     print("\n\nC: ")
+    H = symnmf.converge_h_c(H_init, W, 0.001, 100)
     print_np_list(H)
     
-    Hpy = update_H_until_convergence(Wpy, H_init, 0.5, 100, 0.1)
-    print("\n\nPy: ",)
-    print_np_list(H)
+   
     
     print("\n\n\n\n")
     
