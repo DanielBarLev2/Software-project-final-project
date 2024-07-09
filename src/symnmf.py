@@ -188,49 +188,82 @@ def calculate_similarity(matrix1, matrix2):
     return similarity_percentage
 
 
-if __name__ == "__main__":
-     
+def main():
+    np.random.seed(0)
+    
     k, goal, file_name = sys_arguments()
-    
     x = read_data(file_name=file_name)
-    n, d = x.shape    
-
-    # @todo: implement logic for goal selection and ouput.
-
-    Apy = similarity_matrix(x, n)
-    Dpy = diag_degree_matrix(Apy)
-    Wpy = normalized_similarity_matrix(Apy, Dpy)
     
-    A2, D2, W2 = 0, 0, 0
+    if (goal == "symnmf"):
+        epsilon = 0.001
+        max_iter = 100
+        n, d = x.shape  
+        
+        W = symnmf.symnmf_c('norm', x)
+        H_init = h_initialization(k=k, n=n, m=np.mean(W))
+        H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
+
+        print_np_list(H_final)
+        
+    elif(goal == "sym"):
+        A = symnmf.symnmf_c('sym', x)
+        
+        print_np_list(A)
+        
+    elif(goal == "ddg"):
+        D = symnmf.symnmf_c('ddg', x)
+        
+        print_np_list(D)
+
+    elif(goal == "norm"):   
+        W = symnmf.symnmf_c('norm', x)
+        
+        print_np_list(W)
+        
+        
+if __name__ == "__main__":
+    main()
+    # k, goal, file_name = sys_arguments()
+    
+    # x = read_data(file_name=file_name)
+    # n, d = x.shape    
+
+    # # @todo: implement logic for goal selection and ouput.
+
+    # Apy = similarity_matrix(x, n)
+    # Dpy = diag_degree_matrix(Apy)
+    # Wpy = normalized_similarity_matrix(Apy, Dpy)
+    
+    # A2, D2, W2 = 0, 0, 0
                
-    A = symnmf.symnmf_c('sym', x)
-    D = symnmf.symnmf_c('ddg', x)
-    W = symnmf.symnmf_c('norm', x)
+    # A = symnmf.symnmf_c('sym', x)
+    # D = symnmf.symnmf_c('ddg', x)
+    # W = symnmf.symnmf_c('norm', x)
     
-    H_init = h_initialization(k=3, n=n, m=np.mean(W))
-    print("\n\ninit run: ")
-    print_np_list(H_init)
+    # H_init = h_initialization(k=3, n=n, m=np.mean(W))
+    # print("\n\ninit run: ")
+    # print_np_list(H_init)
     
-    input("??")
+    # input("??")
     
-    print("\n\nPy: ",)
-    Hpy = update_H_until_convergence(H_init, Wpy, 0.001, 100)
-    print_np_list(Hpy)
+    # print("\n\nPy: ",)
+    # Hpy = update_H_until_convergence(H_init, Wpy, 0.001, 100)
+    # print_np_list(Hpy)
     
-    input("??")
+    # input("??")
     
-    print("\n\nC: ")
-    H = symnmf.converge_h_c(H_init, W, 0.001, 100)
-    print_np_list(H)
+    # print("\n\nC: ")
+    # H = symnmf.converge_h_c(H_init, W, 0.001, 100)
+    # print_np_list(H)
     
-    print("\n\n\n\n")
+    # print("\n\n\n\n")
     
-    print(f'A sim: {calculate_similarity(Apy, A)}')
-    print(f'D sim: {calculate_similarity(Dpy, D)}')
-    print(f'W sim: {calculate_similarity(Wpy, W)}')
-    print(f'H sim: {calculate_similarity(Hpy, H)}')
+    # print(f'A sim: {calculate_similarity(Apy, A)}')
+    # print(f'D sim: {calculate_similarity(Dpy, D)}')
+    # print(f'W sim: {calculate_similarity(Wpy, W)}')
+    # print(f'H sim: {calculate_similarity(Hpy, H)}')
 
-    print("Done with no errors :)")
+    # print("Done with no errors :)")
     
     
     
