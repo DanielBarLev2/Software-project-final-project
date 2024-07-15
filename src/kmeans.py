@@ -1,4 +1,5 @@
 from Vector import Vector
+import numpy as np
 import sys
 
 
@@ -33,8 +34,14 @@ def kmeans(input_data: str, k: int, n: int, d: int, max_iter=200):
         centroids_list = updated_centroids_list
 
     # Print the centroid points
-    for centroid in centroids_list:
-        print(centroid)
+    # for centroid in centroids_list:
+    #     print(centroid)
+    
+    labels = []
+    for vector in vector_list:
+        labels.append(vector.centroid)
+    
+    return np.array(labels)
 
 
 def test_validation(k: int, n: int, d: int, max_iter: int):

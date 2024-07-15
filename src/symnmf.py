@@ -43,12 +43,12 @@ def read_data(file_name: str) -> np.ndarray:
     """
     Reads the data from the input file.
     :param file_name: The name of the text file containing the data.
-    :return:The data stored in the file as a NumPy array.
+    :return: The data stored in the file as a NumPy array.
     """
     with open(file_name, 'r') as f:
-        lines = f.readlines()[0:]  # Skip the first line
-        data = [[float(x) for x in line.split()] for line in lines]
-        return np.array(data)
+        lines = f.readlines()
+        data = [[float(x) for x in line.strip().split(',')] for line in lines]
+    return np.array(data)
 
 
 def similarity_matrix(X: np.ndarray, n: int) -> np.ndarray:
@@ -188,6 +188,17 @@ def calculate_similarity(matrix1, matrix2):
     return similarity_percentage
 
 
+def symNMF(x, k, n, epsilon=0.0001, max_iter=200):
+    W = symnmf.symnmf_c('norm', x)
+    H_init = h_initialization(k=k, n=n, m=np.mean(W))
+    H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
+
+    labels = np.argmax(H_final, axis=1)
+    
+    return labels
+    
+    
+    
 def main():
     np.random.seed(0)
     
@@ -195,13 +206,11 @@ def main():
     x = read_data(file_name=file_name)
     
     if (goal == "symnmf"):
-        epsilon = 0.001
-        max_iter = 100
-        n, d = x.shape  
+        n, _ = x.shape  
         
         W = symnmf.symnmf_c('norm', x)
         H_init = h_initialization(k=k, n=n, m=np.mean(W))
-        H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
+        H_final = symnmf.converge_h_c(H_init, W, epsilon=0.001, max_iter=200)
 
         print_np_list(H_final)
         
