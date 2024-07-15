@@ -21,4 +21,4 @@ Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2);
 Matrix transposeMatrix(Matrix matrix);
 double frobeniusNorm(Matrix matrix1, Matrix matrix2);
 
-#endif
+#endif /* MATRIX_H */

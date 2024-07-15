@@ -10,15 +10,15 @@
 
 
 void getDimension(const char *fileName, int* n, int* d) {
-    FILE *file;
     char line[MAX_ROW_LEN];
     char *token;
+    FILE *file;
 
     *n = 0, *d = 0;
 
     file = fopen(fileName, "r");
     if (file == NULL) {
-        fprintf(stderr, "Error opening file %s\n", fileName);
+        printf("An Error Has Occurred");
         exit(1);
     }
 
@@ -40,21 +40,23 @@ void getDimension(const char *fileName, int* n, int* d) {
 
 
 Matrix readData(const char* filename, int n, int d) {
-    Matrix X;
-    FILE *file;
-    char *token;
-    int row, col;
     char line[MAX_ROW_LEN];
+    int row, col;
+    char *token;
+    FILE *file;
+    Matrix X;
 
     X = createZeroMatrix(n, d);
 
     file = fopen(filename, "r");
+
     if (file == NULL) {
-        fprintf(stderr, "Error opening file\n");
-        exit(EXIT_FAILURE);
+        printf("An Error Has Occurred");
+        exit(1);
     }
 
     row = 0;
+
     while (fgets(line, sizeof(line), file)) {
         token = strtok(line, " ");
         col = 0;
@@ -75,18 +77,21 @@ Matrix readData(const char* filename, int n, int d) {
 
 
 Matrix sym(Matrix X){
-    Matrix A;
-    double distance;
-    int current, other;
     double *currentVector, *otherVector;
+    int current, other;
+    double distance;
+    Matrix A;
 
     A = createZeroMatrix(X.rows, X.rows);
 
     for (current = 0; current < X.rows; current++){
+
         for (other = 0; other < X.rows; other++){
+
             if (current != other){
                 currentVector = X.data[current];
                 otherVector = X.data[other];
+
                 distance = squaredEuclideanDistance(currentVector, otherVector, X.cols);
                 A.data[current][other] =  exp((distance / -2));
             }
@@ -126,7 +131,7 @@ Matrix norm(Matrix D, Matrix A){
     return W;
 }
 
-
+/* for python*/
 Matrix symnmf(char *goal, char *fileName){
     int n, d;
     Matrix X;
@@ -140,23 +145,23 @@ Matrix symnmf(char *goal, char *fileName){
 
     if (strcmp(goal,"sym") == 0){
         A = sym(X);
-        freeMatrix(X);  // Free X before returning A
+        freeMatrix(X);  
         return A;
     }
     if (strcmp(goal,"ddg") == 0){
         A = sym(X);
         D = ddg(A);
-        freeMatrix(X);  // Free X before returning D
-        freeMatrix(A);  // Free A before returning D
+        freeMatrix(X);  
+        freeMatrix(A);  
         return D;
     }
     if (strcmp(goal,"norm") == 0){
         A = sym(X);
         D = ddg(A);
         W = norm(D, A);
-        freeMatrix(X);  // Free X before returning W
-        freeMatrix(A);  // Free A before returning W
-        freeMatrix(D);  // Free D before returning W
+        freeMatrix(X);  
+        freeMatrix(A);  
+        freeMatrix(D);  
         return W;
     }
 
@@ -165,11 +170,11 @@ Matrix symnmf(char *goal, char *fileName){
 }
 
 
-
+/* for python*/
 Matrix update_H(Matrix H_current, Matrix W) {
-    Matrix nominator = multiplyMatrix(W, H_current);
     Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, transposeMatrix(H_current)), H_current);
     Matrix H_new = createZeroMatrix(H_current.rows, H_current.cols);
+    Matrix nominator = multiplyMatrix(W, H_current);
     double beta = 0.5;
 
     for (int i = 0; i < H_current.rows; i++) {
@@ -185,34 +190,42 @@ Matrix update_H(Matrix H_current, Matrix W) {
 }
 
 
+/* for python*/
 Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
     int k;
 
     for (k = 0; k < iter; k++) {
         H_new = update_H(H, W);
+
         if (frobeniusNorm(H_new, H) < eps) {
             printf("Converged after %d iterations.\n", k + 1);
             break;
         }
+        
         H = H_new;
     }
 
     return H_new;
 }
 
+
 int main(int argc, char *argv[]) {
+    const char *fileName;
+    char *goal;
     int n, d;
     Matrix X;
     Matrix A;
     Matrix D;
     Matrix W;
-    char *goal;
-    const char *fileName;
 
     if (argc > 0){
         goal = argv[1];
         fileName = argv[2];
+    }
+    else{
+         printf("An Error Has Occurred");
+         exit(1);
     }
 
     getDimension(fileName, &n, &d);
@@ -229,25 +242,30 @@ int main(int argc, char *argv[]) {
                 W = norm(D, A);
             }
         }
+        
 
-        printf("current test for matrix:\n");
-        printMatrix(X);
-        freeMatrix(X); 
+            if (strcmp(goal, "sym") == 0){
+                    printMatrix(A);
+                    freeMatrix(A);
+            }
+            else if (strcmp(goal, "ddg") == 0){
+                    printMatrix(D);
+                    freeMatrix(D);
+                    freeMatrix(A); 
+            } 
+            else if (strcmp(goal, "norm") == 0){
+                    printMatrix(W);
+                    freeMatrix(W);
+                    freeMatrix(D); 
+                    freeMatrix(A); 
+        }
 
-        if (strcmp(goal,"sym") == 0){
-            printMatrix(A);
-            freeMatrix(A);
-        }
-        if (strcmp(goal,"ddg") == 0){
-            printMatrix(D);
-            freeMatrix(D);
-        }
-        if (strcmp(goal,"norm") == 0){
-            printMatrix(W);
-            freeMatrix(W);
-        }
+    } 
+    else{
+        printf("An Error Has Occurred");
+        exit(1);
     }
+
     return 0;
 }
-
 

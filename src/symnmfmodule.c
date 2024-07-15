@@ -16,7 +16,7 @@ static Matrix convert_numpy_to_matrix(PyArrayObject *array) {
     matrix.data = (double **)malloc(rows * sizeof(double *));
 
     if (matrix.data == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix rows.");
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
         matrix.rows = 0;
         matrix.cols = 0;
         return matrix;
@@ -25,7 +25,7 @@ static Matrix convert_numpy_to_matrix(PyArrayObject *array) {
     for (int i = 0; i < rows; ++i) {
         matrix.data[i] = (double *)malloc(cols * sizeof(double));
         if (matrix.data[i] == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Memory allocation failed for matrix columns.");
+            PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
         
             for (int j = 0; j < i; ++j) {
                 free(matrix.data[j]);
@@ -50,7 +50,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
     PyObject *pyOutputMatrixObj = PyList_New(outputMatrix.rows);
 
     if (!pyOutputMatrixObj) {
-        PyErr_SetString(PyExc_RuntimeError, "Unable to create Python list for matrix.");
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
         return NULL;
     }
     
@@ -58,7 +58,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
         PyObject *pyRow = PyList_New(outputMatrix.cols);
         if (!pyRow) {
             Py_DECREF(pyOutputMatrixObj);
-            PyErr_SetString(PyExc_RuntimeError, "Unable to create Python list for row.");
+            PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
             return NULL;
         }
         for (int j = 0; j < outputMatrix.cols; ++j) {
@@ -70,7 +70,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
                     Py_DECREF(PyList_GET_ITEM(pyOutputMatrixObj, k));
                 }
                 Py_DECREF(pyOutputMatrixObj);
-                PyErr_SetString(PyExc_RuntimeError, "Unable to convert double to Python float.");
+                PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
                 return NULL;
             }
             PyList_SET_ITEM(pyRow, j, pyValue);
@@ -96,7 +96,7 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     w_array = (PyArrayObject *)PyArray_FROM_OTF(w_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
 
     if (h_array == NULL || w_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Failed to convert input to NumPy arrays.");
+        PyErr_SetString(PyExc_TypeError, "An Error Has Occurred");
         Py_XDECREF(h_array);
         Py_XDECREF(w_array);
         return NULL;
@@ -106,7 +106,7 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     w_matrix = convert_numpy_to_matrix(w_array);
 
     if (h_matrix.data == NULL || w_matrix.data == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to convert NumPy arrays to Matrix.");
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
         freeMatrix(h_matrix);
         freeMatrix(w_matrix);
         Py_DECREF(h_array);
@@ -114,11 +114,10 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    printf("converging in c . . .");
     result_matrix = converge_H(h_matrix, w_matrix, eps, iter);
 
     if (result_matrix.data == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to converge matrices.");
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
         freeMatrix(h_matrix);
         freeMatrix(w_matrix);
         Py_DECREF(h_array);
@@ -136,7 +135,7 @@ static PyObject* converge_h_c(PyObject* self, PyObject* args) {
     Py_DECREF(w_array);
 
     if (pyResultObj == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to convert result matrix to Python object.");
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
     }
 
     return pyResultObj;
@@ -156,11 +155,17 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
 
     x_array = (PyArrayObject *)PyArray_FROM_OTF(x_obj, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
     if (x_array == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Failed to convert input to NumPy array.");
+        PyErr_SetString(PyExc_TypeError, "An Error Has Occurred");
         return NULL;
     }
 
     x_matrix = convert_numpy_to_matrix(x_array);
+
+     if (x_matrix.data == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
+        Py_DECREF(x_array);
+        return NULL;
+    }
 
     if (strcmp(goal, "sym") == 0) {
         outputMatrix = sym(x_matrix);
@@ -176,7 +181,7 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
         freeMatrix(sym_matrix);
     } 
     else {
-        PyErr_SetString(PyExc_ValueError, "Invalid goal. Expected 'sym', 'ddg', or 'norm'.");
+        PyErr_SetString(PyExc_ValueError, "An Error Has Occurred");
         freeMatrix(x_matrix);
         Py_DECREF(x_array);
         return NULL;
@@ -188,6 +193,10 @@ static PyObject* symnmf_c(PyObject* self, PyObject* args) {
     freeMatrix(outputMatrix);
 
     Py_DECREF(x_array);
+
+    if (pyOutputMatrixObj == NULL) { 
+        PyErr_SetString(PyExc_RuntimeError, "An Error Has Occurred");
+    }
 
     return pyOutputMatrixObj;
 }
