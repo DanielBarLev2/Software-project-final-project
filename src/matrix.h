@@ -1,10 +1,11 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+/* Define a structure for Matrix with rows, cols, and data */
 typedef struct {
-    int rows;
-    int cols;
-    double **data;
+    int rows;       /* Number of rows in the matrix */
+    int cols;       /* Number of columns in the matrix */
+    double **data;  /* Pointer to the matrix data */
 } Matrix;
 
 Matrix createMatrix(int rows, int cols, double **values);
