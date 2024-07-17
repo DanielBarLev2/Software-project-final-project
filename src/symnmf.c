@@ -6,9 +6,15 @@
 #include "matrix.c"
 #include "matrix.h"
 
-#define MAX_ROW_LEN 1024
+#define MAX_ROW_LEN 1024 /* Max dim for data points. */
 
 
+/* 
+ * Function to get the dimensions of the matrix from the file 
+ * Input: fileName - name of the file containing the matrix
+ * Output: n - number of rows
+ *         d - number of columns
+ */
 void getDimension(const char *fileName, int* n, int* d) {
     char line[MAX_ROW_LEN];
     char *token;
@@ -39,6 +45,14 @@ void getDimension(const char *fileName, int* n, int* d) {
 }
 
 
+
+/* 
+ * Function to read data from a file and return it as a matrix 
+ * Input: filename - name of the file containing the data
+ *        n - number of rows
+ *        d - number of columns
+ * Return: Matrix - the data points from the file as a matrix
+ */
 Matrix readData(const char* filename, int n, int d) {
     char line[MAX_ROW_LEN];
     int row, col;
@@ -57,6 +71,7 @@ Matrix readData(const char* filename, int n, int d) {
 
     row = 0;
 
+    /* Reading file line by line by tokenizing. */
     while (fgets(line, sizeof(line), file)) {
         token = strtok(line, " ");
         col = 0;
@@ -76,6 +91,11 @@ Matrix readData(const char* filename, int n, int d) {
 }
 
 
+/* 
+ * Function to compute the similarity matrix 
+ * Input: X - data matrix (n x d)
+ * Return: Matrix - similarity matrix (n x n)
+ */
 Matrix sym(Matrix X){
     double *currentVector, *otherVector;
     int current, other;
@@ -105,6 +125,11 @@ Matrix sym(Matrix X){
 }
 
 
+/* 
+ * Function to compute the diagonal degree matrix 
+ * Input: A - similarity matrix (n x n)
+ * Return: Matrix - diagonal degree matrix (n x n)
+ */
 Matrix ddg(Matrix A){
     int diag;
     Matrix D;
@@ -118,7 +143,12 @@ Matrix ddg(Matrix A){
     return D;
 }
 
-
+/* 
+ * Function to compute the normalized Laplacian matrix 
+ * Input: D - diagonal degree matrix (n x n)
+ *        A - similarity matrix (n x n)
+ * Return: Matrix - normalized Laplacian matrix (n x n)
+ */
 Matrix norm(Matrix D, Matrix A){
     Matrix W, T;
 
@@ -131,7 +161,15 @@ Matrix norm(Matrix D, Matrix A){
     return W;
 }
 
-/* for python*/
+/* 
+ * Python wrapper function for different goals:
+ * Input: goal - goal type:
+            i. sym: Calculate and output the Similarity Matrix
+            ii. ddg: Calculate and output the Diagonal Degree Matrix
+            iii. norm: Calculate and output the Normalized Similarity Matrix
+ *        fileName - name of the file containing the data
+ * Return: Matrix - the result based on the specified goal
+ */
 Matrix symnmf(char *goal, char *fileName){
     int n, d;
     Matrix X;
@@ -170,15 +208,21 @@ Matrix symnmf(char *goal, char *fileName){
 }
 
 
-/* for python*/
+/* 
+ * Python wrapper helper function to update H matrix for convarge_H
+ * Input: H_current - current H matrix (n x k)
+ *        W - weight matrix (n x n)
+ * Return: Matrix - updated H matrix (n x k)
+ */
 Matrix update_H(Matrix H_current, Matrix W) {
     Matrix denominator = multiplyMatrix(multiplyMatrix(H_current, transposeMatrix(H_current)), H_current);
     Matrix H_new = createZeroMatrix(H_current.rows, H_current.cols);
     Matrix nominator = multiplyMatrix(W, H_current);
     double beta = 0.5;
+    int i, j;
 
-    for (int i = 0; i < H_current.rows; i++) {
-        for (int j = 0; j < H_current.cols; j++) {
+    for (i = 0; i < H_current.rows; i++) {
+        for (j = 0; j < H_current.cols; j++) {
             H_new.data[i][j] = H_current.data[i][j] * (1 - beta + beta * (nominator.data[i][j] / denominator.data[i][j]));
         }
     }
@@ -190,7 +234,14 @@ Matrix update_H(Matrix H_current, Matrix W) {
 }
 
 
-/* for python*/
+/* 
+ * Python wrapper function to iteratively update H matrix until convergence 
+ * Input: H - initial H matrix (n x k)
+ *        W - weight matrix (n x n)
+ *        eps - convergence threshold. def = 0.0001
+ *        iter - maximum number of iterations. def = 300
+ * Return: Matrix - converged H matrix (n x k)
+ */
 Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
     Matrix H_new = createZeroMatrix(H.rows, H.cols);
     int k;
@@ -210,6 +261,12 @@ Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
 }
 
 
+/* 
+ * Main function to run different goals based on input arguments 
+ * Input: argc - number of command-line arguments
+ *        argv - array of command-line arguments
+ * Return: int - exit status
+ */
 int main(int argc, char *argv[]) {
     const char *fileName;
     char *goal;
@@ -224,7 +281,7 @@ int main(int argc, char *argv[]) {
         fileName = argv[2];
     }
     else{
-         printf("An Error Has Occurred");
+         printf("An Error Has Occurred\n");
          exit(1);
     }
 
@@ -268,4 +325,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
