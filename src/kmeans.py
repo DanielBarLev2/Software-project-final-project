@@ -1,9 +1,8 @@
 from Vector import Vector
 import numpy as np
-import sys
 
 
-def kmeans(input_data: str, k: int, n: int, d: int, max_iter=200):
+def kmeans(input_data: str, k: int, n: int, d: int, max_iter=300):
     """
     Cluster data into K groups based on similarities between data points, using Euclidean distance.
     :param input_data: Text file containing the data; assuming valid
