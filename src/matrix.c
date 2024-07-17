@@ -3,7 +3,11 @@
 #include <math.h>
 #include "matrix.h"
 
+/* This C code defines a set of functions for creating,
+ * manipulating, and performing operations on matrices. */
 
+/* Function to create a matrix with given dimensions and values.
+ * If values is NULL, the matrix is initialized with zeros. */
 Matrix createMatrix(int rows, int cols, double **values) {
     Matrix matrix;
     int i, j;
@@ -31,7 +35,8 @@ Matrix createMatrix(int rows, int cols, double **values) {
                 matrix.data[i][j] = values[i][j];
             }
 
-        } else {
+        } 
+        else {
 
             for (j = 0; j < cols; j++) {
                 matrix.data[i][j] = 0.0;
@@ -42,7 +47,7 @@ Matrix createMatrix(int rows, int cols, double **values) {
     return matrix;
 }
 
-
+/* Function to create a matrix with given dimensions initialized to zeros. */
 Matrix createZeroMatrix(int rows, int cols) {
     Matrix mat;
     int i, j;
@@ -73,6 +78,7 @@ Matrix createZeroMatrix(int rows, int cols) {
 }
 
 
+/* Function to free the memory allocated for a matrix. */
 void freeMatrix(Matrix matrix) {
     int i;
 
@@ -84,6 +90,7 @@ void freeMatrix(Matrix matrix) {
 }
 
 
+/* Function to add two matrices of the same dimensions. */
 Matrix addMatrix(Matrix matrix1, Matrix matrix2) {
     Matrix result;
     int i, j;
@@ -106,6 +113,7 @@ Matrix addMatrix(Matrix matrix1, Matrix matrix2) {
 }
 
 
+/* Function to add two matrices of the same dimensions. */
 Matrix multiplyScalarMatrix(Matrix matrix, double scalar) {
     Matrix result;
     int i, j;
@@ -121,6 +129,7 @@ Matrix multiplyScalarMatrix(Matrix matrix, double scalar) {
 }
 
 
+/* Function to print the elements of a matrix. */
 void printMatrix(Matrix matrix) {
     int i, j;
 
@@ -139,6 +148,7 @@ void printMatrix(Matrix matrix) {
 }
 
 
+/* Function to compute the sum of the elements in a specific row. */
 double sumRow(Matrix matrix, int row) {
     double sum = 0.0;
     int j;
@@ -150,7 +160,7 @@ double sumRow(Matrix matrix, int row) {
     return sum;
 }
 
-
+/* Function to compute the sum of the elements in a specific column. */
 double sumColumn(Matrix matrix, int col) {
     double sum = 0.0;
     int i;
@@ -162,6 +172,7 @@ double sumColumn(Matrix matrix, int col) {
 }
 
 
+/* Function to compute the squared Euclidean distance between two vectors. */
 double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
     double sum = 0.0;
     int i;
@@ -175,6 +186,8 @@ double squaredEuclideanDistance(double *vector1, double *vector2, int size) {
 }
 
 
+/* Function to raise the diagonal elements of a matrix to a given power. /
+ * Power values are from R*/
 Matrix powerDiagMatrix(Matrix matrix, double power) {
     Matrix result;
     int i;
@@ -189,6 +202,7 @@ Matrix powerDiagMatrix(Matrix matrix, double power) {
 }
 
 
+/* Function to multiply two matrices of right sizes. */
 Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
     Matrix result;
     int i, j, k;
@@ -211,6 +225,8 @@ Matrix multiplyMatrix(Matrix matrix1, Matrix matrix2) {
     return result;
 }
 
+
+/* Function to transpose a matrix. */
 Matrix transposeMatrix(Matrix matrix) {
     Matrix result;
     int i, j;
@@ -227,6 +243,7 @@ Matrix transposeMatrix(Matrix matrix) {
 }
 
 
+/* Function to compute the Frobenius norm between two matrices. */
 double frobeniusNorm(Matrix matrix1, Matrix matrix2) {
     double norm = 0.0;
     int i, j;
