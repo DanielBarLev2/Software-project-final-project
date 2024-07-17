@@ -22,7 +22,7 @@ def sys_arguments():
     k, goal, file_name = None, None, None
     
     if len(sys.argv) != 4:
-        raise ValueError(len(sys.argv), " are not enough cmd arguments")
+        raise ValueError(len(sys.argv), "An Error Has Occrred")
 
     try:
         k = int(sys.argv[1])
@@ -30,10 +30,10 @@ def sys_arguments():
         file_name = sys.argv[3]
 
         if goal not in ["symnmf", "sym", "ddg", "norm"]:
-            raise ValueError("Not a valid goal")
+            raise ValueError("An Error Has Occrred")
 
     except ValueError:
-        print("Invalid arguments")
+        print("An Error Has Occrred")
         sys.exit(1)
 
     return k, goal, file_name
@@ -49,50 +49,6 @@ def read_data(file_name: str) -> np.ndarray:
         lines = f.readlines()
         data = [[float(x) for x in line.strip().split(',')] for line in lines]
     return np.array(data)
-
-
-def similarity_matrix(X: np.ndarray, n: int) -> np.ndarray:
-    """
-    Creates the similarity matrix from the input data.
-    :param X: input data.
-    :param n: number of data points
-    :return: the similarity matrix.
-    """
-    # broadcasts x(n, d) to x(n, 1, d) to perform pairwise subtraction between every pair.
-    # then raises to the second power and sums over the last dimension d.
-    x_norm = ((X[:, np.newaxis] - X) ** 2).sum(axis=-1)
-    A = np.exp(-x_norm / 2)
-    np.fill_diagonal(A, val=0)
-
-    return A
-
-
-def diag_degree_matrix(A: np.ndarray) -> np.ndarray:
-    """
-    Creates the diagonal degree matrix from the matrix A.
-    :param A: the similarity matrix.
-    :return: the diagonal degree matrix
-    """
-    D = np.zeros_like(A)
-    np.fill_diagonal(D, A.sum(axis=1))
-    return D
-
-
-def normalized_similarity_matrix(A: np.ndarray, D: np.ndarray) -> np.ndarray:
-    """
-    Creates the normalized similarity matrix from the similarity matrix and from diagonal degree matrix.
-    :param A: similarity matrix
-    :param D: diagonal degree matrix
-    :return: normalized similarity matrix
-    """
-    D_sqrt_inverse = np.zeros_like(D)
-    np.fill_diagonal(D_sqrt_inverse, np.sqrt(np.diag(D)))
-    D_sqrt_inverse = np.linalg.matrix_power(D_sqrt_inverse, -1)
-
-    W = np.matmul(D_sqrt_inverse, A)
-    W = np.matmul(W, D_sqrt_inverse)
-
-    return W
 
 
 def h_initialization(k: int, n: int, m: float) -> np.ndarray:
@@ -129,13 +85,14 @@ def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
     """
     beta=0.5
     prev_H = H.copy()
+    
     for t in range(max_iterations):
         WH = np.dot(W, H)
         HHTH = np.dot(np.dot(H, H.T), H)
         H = H * (1 - beta + beta * (WH / HHTH))
 
-        # Check convergence criteria
-        diff_norm = np.linalg.norm(H - prev_H, 'fro')  # Frobenius norm
+        # Check convergence
+        diff_norm = np.linalg.norm(H - prev_H, 'fro') 
         if diff_norm < epsilon:
             print(f"Converged after {t+1} iterations.")
             break
@@ -149,46 +106,22 @@ def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
 
 
 def print_np_list(np_list):
+    """
+    Print np list as described in 2.1.4: 
+    For example:
+        0.0600,0.0100
+        0.0100,0.0500
+        0.0100,0.0400
+        0.0200,0.0400
+        0.0500,0.0200
+    Args:
+        np_list: numpy list
+    """
     for row in np_list:
         print(",".join(f"{value:.4f}" for value in row))
         
 
-def calculate_similarity(matrix1, matrix2):
-    """
-    Calculate the similarity between two matrices by value up to 4 digits and return it as a percentage.
-
-    Parameters:
-    - matrix1: First matrix (list of lists or numpy array)
-    - matrix2: Second matrix (list of lists or numpy array)
-
-    Returns:
-    - similarity_percentage: Similarity percentage between the two matrices
-    """
-    # Convert lists to numpy arrays if they are not already
-    if not isinstance(matrix1, np.ndarray):
-        matrix1 = np.array(matrix1)
-    if not isinstance(matrix2, np.ndarray):
-        matrix2 = np.array(matrix2)
-
-    # Check if matrices have the same shape
-    if matrix1.shape != matrix2.shape:
-        raise ValueError("Matrices must have the same shape to calculate similarity.")
-
-    # Round the matrices to 4 decimal places
-    matrix1_rounded = np.round(matrix1, 4)
-    matrix2_rounded = np.round(matrix2, 4)
-    
-    # Compare element-wise and calculate the number of similar elements
-    similar_elements = np.sum(matrix1_rounded == matrix2_rounded)
-    total_elements = matrix1.size
-
-    # Calculate similarity percentage
-    similarity_percentage = (similar_elements / total_elements) * 100
-
-    return similarity_percentage
-
-
-def symNMF(x, k, n, epsilon=0.0001, max_iter=200):
+def symNMF(x, k, n, epsilon=0.0001, max_iter=300):
     W = symnmf.symnmf_c('norm', x)
     H_init = h_initialization(k=k, n=n, m=np.mean(W))
     H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
@@ -207,10 +140,11 @@ def main():
     
     if (goal == "symnmf"):
         n, _ = x.shape  
-        
         W = symnmf.symnmf_c('norm', x)
         H_init = h_initialization(k=k, n=n, m=np.mean(W))
-        H_final = symnmf.converge_h_c(H_init, W, epsilon=0.001, max_iter=200)
+        epsilon = 0.0001
+        max_iter = 300
+        H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
 
         print_np_list(H_final)
         
@@ -232,47 +166,7 @@ def main():
         
 if __name__ == "__main__":
     main()
-    # k, goal, file_name = sys_arguments()
     
-    # x = read_data(file_name=file_name)
-    # n, d = x.shape    
-
-    # # @todo: implement logic for goal selection and ouput.
-
-    # Apy = similarity_matrix(x, n)
-    # Dpy = diag_degree_matrix(Apy)
-    # Wpy = normalized_similarity_matrix(Apy, Dpy)
-    
-    # A2, D2, W2 = 0, 0, 0
-               
-    # A = symnmf.symnmf_c('sym', x)
-    # D = symnmf.symnmf_c('ddg', x)
-    # W = symnmf.symnmf_c('norm', x)
-    
-    # H_init = h_initialization(k=3, n=n, m=np.mean(W))
-    # print("\n\ninit run: ")
-    # print_np_list(H_init)
-    
-    # input("??")
-    
-    # print("\n\nPy: ",)
-    # Hpy = update_H_until_convergence(H_init, Wpy, 0.001, 100)
-    # print_np_list(Hpy)
-    
-    # input("??")
-    
-    # print("\n\nC: ")
-    # H = symnmf.converge_h_c(H_init, W, 0.001, 100)
-    # print_np_list(H)
-    
-    # print("\n\n\n\n")
-    
-    # print(f'A sim: {calculate_similarity(Apy, A)}')
-    # print(f'D sim: {calculate_similarity(Dpy, D)}')
-    # print(f'W sim: {calculate_similarity(Wpy, W)}')
-    # print(f'H sim: {calculate_similarity(Hpy, H)}')
-
-    # print("Done with no errors :)")
     
     
     
