@@ -6,14 +6,14 @@
 #include "matrix.c"
 #include "matrix.h"
 
-#define MAX_ROW_LEN 1024 /* Max dim for data points. */
+#define MAX_ROW_LEN 1024 /* Arbitrary max dim for data points. */
 
 
 /* 
- * Function to get the dimensions of the matrix from the file 
- * Input: fileName - name of the file containing the matrix
- * Output: n - number of rows
- *         d - number of columns
+ * Function to extract the dimensions (row x col) of the data file 
+ * Input: fileName - path to the file containing the data
+ * Output: n - pointer to number of rows; number of data points
+ *         d - pointer to number of columns; dimention of each point
  */
 void getDimension(const char *fileName, int* n, int* d) {
     char line[MAX_ROW_LEN];
@@ -30,10 +30,12 @@ void getDimension(const char *fileName, int* n, int* d) {
 
     if (fgets(line, sizeof(line), file) != NULL) {
         token = strtok(line, " \t\n");
+        
         while (token != NULL) {
             (*d)++;
             token = strtok(NULL, " \t\n");
         }
+
         (*n)++;
     }
 
@@ -45,12 +47,11 @@ void getDimension(const char *fileName, int* n, int* d) {
 }
 
 
-
 /* 
  * Function to read data from a file and return it as a matrix 
- * Input: filename - name of the file containing the data
- *        n - number of rows
- *        d - number of columns
+ * Input: filename - path to the file containing the data
+ *        n - pointer to number of rows; number of data points
+ *        d - pointer to number of columns; dimention of each point
  * Return: Matrix - the data points from the file as a matrix
  */
 Matrix readData(const char* filename, int n, int d) {
@@ -299,8 +300,6 @@ int main(int argc, char *argv[]) {
                 W = norm(D, A);
             }
         }
-        
-
             if (strcmp(goal, "sym") == 0){
                     printMatrix(A);
                     freeMatrix(A);
@@ -316,7 +315,6 @@ int main(int argc, char *argv[]) {
                     freeMatrix(D); 
                     freeMatrix(A); 
         }
-
     } 
     else{
         printf("An Error Has Occurred");

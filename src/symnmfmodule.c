@@ -72,6 +72,7 @@ static PyObject* convert_matrix_to_python(Matrix outputMatrix) {
     
     for (i = 0; i < outputMatrix.rows; ++i) {
         PyObject *pyRow = PyList_New(outputMatrix.cols);
+        
         if (!pyRow) {
             /* Clean up if creating a row list fails */
             Py_DECREF(pyOutputMatrixObj);

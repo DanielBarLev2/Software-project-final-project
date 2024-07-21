@@ -4,7 +4,7 @@ from symnmf import read_data, symNMF
 from sklearn.metrics import silhouette_score
 
 def main():
-    """_summary_
+    """
         Compare SymNMF to Kmeans from HW1.
         Prints the silhouette_score from the sklearn.metrics for SymNMF and Kmeans.
         A higher score indicates better-defined clusters.
