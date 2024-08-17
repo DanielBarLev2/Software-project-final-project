@@ -251,7 +251,6 @@ Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
         H_new = update_H(H, W);
 
         if (frobeniusNorm(H_new, H) < eps) {
-            printf("Converged after %d iterations.\n", k + 1);
             break;
         }
         

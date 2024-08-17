@@ -25,8 +25,8 @@ def sys_arguments():
         raise ValueError(len(sys.argv), "An Error Has Occrred")
 
     try:
-        k = int(sys.argv[1])
-        goal = sys.argv[2]
+        goal = sys.argv[1]
+        k = int(sys.argv[2])
         file_name = sys.argv[3]
 
         if goal not in ["symnmf", "sym", "ddg", "norm"]:
@@ -36,7 +36,7 @@ def sys_arguments():
         print("An Error Has Occrred")
         sys.exit(1)
 
-    return k, goal, file_name
+    return goal, k, file_name
 
 
 def read_data(file_name: str) -> np.ndarray:
@@ -135,8 +135,9 @@ def symNMF(x, k, n, epsilon=0.0001, max_iter=300):
 def main():
     np.random.seed(0)
     
-    k, goal, file_name = sys_arguments()
+    goal, k, file_name = sys_arguments()
     x = read_data(file_name=file_name)
+    
     
     if (goal == "symnmf"):
         n, _ = x.shape  
