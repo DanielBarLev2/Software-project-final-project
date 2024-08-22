@@ -100,7 +100,7 @@ Matrix addMatrix(Matrix matrix1, Matrix matrix2) {
         exit(1);
     }
 
-    result = createMatrix(matrix1.rows, matrix1.cols, NULL);
+    result = createZeroMatrix(matrix1.rows, matrix1.cols);
 
     for (i = 0; i < matrix1.rows; i++) {
 
@@ -118,7 +118,7 @@ Matrix multiplyScalarMatrix(Matrix matrix, double scalar) {
     Matrix result;
     int i, j;
 
-    result = createMatrix(matrix.rows, matrix.cols, NULL);
+    result = createZeroMatrix(matrix.rows, matrix.cols);
 
     for (i = 0; i < matrix.rows; i++) {
         for (j = 0; j < matrix.cols; j++) {
@@ -231,14 +231,13 @@ Matrix transposeMatrix(Matrix matrix) {
     Matrix result;
     int i, j;
 
-    result = createMatrix(matrix.cols, matrix.rows, NULL);
+    result = createZeroMatrix(matrix.cols, matrix.rows);
 
     for (i = 0; i < matrix.rows; i++) {
         for (j = 0; j < matrix.cols; j++) {
             result.data[j][i] = matrix.data[i][j];
         }
     }
-
     return result;
 }
 
@@ -253,5 +252,5 @@ double frobeniusNorm(Matrix matrix1, Matrix matrix2) {
             norm += diff * diff;
         }
     }
-    return sqrt(norm);
+    return norm;
 }

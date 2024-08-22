@@ -22,7 +22,7 @@ def sys_arguments():
     k, goal, file_name = None, None, None
     
     if len(sys.argv) != 4:
-        raise ValueError(len(sys.argv), " are not enough cmd arguments")
+        raise ValueError(len(sys.argv), "An Error Has Occurred")
 
     try:
         k = int(sys.argv[1])
@@ -30,7 +30,7 @@ def sys_arguments():
         file_name = sys.argv[3]
 
         if goal not in ["symnmf", "sym", "ddg", "norm"]:
-            raise ValueError("Not a valid goal")
+            raise ValueError("An Error Has Occurred")
 
     except ValueError:
         print("Invalid arguments")
@@ -60,7 +60,6 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     :return: lower dimension non-negative matrix H [n×k].
     """
     np.random.seed(0)
-    np.random.uniform()
 
     upper_bound = 2 * np.sqrt(m / k)
 
@@ -69,7 +68,7 @@ def h_initialization(k: int, n: int, m: float) -> np.ndarray:
     return h
 
 
-def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
+def update_H_until_convergence(H, W, epsilon=1e-4, max_iterations=300):
     """
     Update H using the given rule until convergence criteria are met.
 
@@ -92,7 +91,7 @@ def update_H_until_convergence(H, W, epsilon=1e-5, max_iterations=100):
         H = H * (1 - beta + beta * (WH / HHTH))
 
         # Check convergence
-        diff_norm = np.linalg.norm(H - prev_H, 'fro') 
+        diff_norm = np.linalg.norm(H - prev_H, 'fro') ** 2
         if diff_norm < epsilon:
             print(f"Converged after {t+1} iterations.")
             break
@@ -137,16 +136,14 @@ def main():
     
     k, goal, file_name = sys_arguments()
     x = read_data(file_name=file_name)
-    
-    
     if (goal == "symnmf"):
         n, _ = x.shape  
         W = symnmf.symnmf_c('norm', x)
-        H_init = h_initialization(k=k, n=n, m=np.mean(W))
+        H_init = h_initialization(k=k, n=n, m=np.average(W))
         epsilon = 0.0001
         max_iter = 300
         H_final = symnmf.converge_h_c(H_init, W, epsilon, max_iter)
-
+        
         print_np_list(H_final)
         
     elif(goal == "sym"):

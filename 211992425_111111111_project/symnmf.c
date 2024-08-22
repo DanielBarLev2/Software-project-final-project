@@ -15,31 +15,28 @@
  * Output: n - pointer to number of rows; number of data points
  *         d - pointer to number of columns; dimention of each point
  */
-void getDimension(const char *fileName, int* n, int* d) {
+void getDimension(const char *fileName, int *n, int *d) {
     char line[MAX_ROW_LEN];
     char *token;
     FILE *file;
 
-    *n = 0, *d = 0;
+    *n = 0;
+    *d = 0;
 
     file = fopen(fileName, "r");
     if (file == NULL) {
         printf("An Error Has Occurred");
-        exit(1);
+        return;
     }
 
-    if (fgets(line, sizeof(line), file) != NULL) {
-        token = strtok(line, " \t\n");
-        
-        while (token != NULL) {
-            (*d)++;
-            token = strtok(NULL, " \t\n");
+    while (fgets(line, MAX_ROW_LEN, file) != NULL) {
+        if (*n == 0) {
+            token = strtok(line, ",");
+            while (token != NULL) {
+                (*d)++;
+                token = strtok(NULL, ",");
+            }
         }
-
-        (*n)++;
-    }
-
-    while (fgets(line, sizeof(line), file) != NULL) {
         (*n)++;
     }
 
@@ -56,7 +53,8 @@ void getDimension(const char *fileName, int* n, int* d) {
  */
 Matrix readData(const char* filename, int n, int d) {
     char line[MAX_ROW_LEN];
-    int row, col;
+    int row = 0;
+    int col;
     char *token;
     FILE *file;
     Matrix X;
@@ -64,30 +62,23 @@ Matrix readData(const char* filename, int n, int d) {
     X = createZeroMatrix(n, d);
 
     file = fopen(filename, "r");
-
     if (file == NULL) {
-        printf("An Error Has Occurred");
-        exit(1);
+         printf("An Error Has Occurred");
+        return X;
     }
 
-    row = 0;
-
-    /* Reading file line by line by tokenizing. */
-    while (fgets(line, sizeof(line), file)) {
-        token = strtok(line, " ");
+    while (fgets(line, MAX_ROW_LEN, file) != NULL && row < n) {
         col = 0;
-
-        while (token != NULL) {
-            char *endptr;
-            X.data[row][col] = strtod(token, &endptr);
-            token = strtok(NULL, " ");
+        token = strtok(line, ",");
+        while (token != NULL && col < d) {
+            X.data[row][col] = atof(token);
+            token = strtok(NULL, ",");
             col++;
         }
         row++;
     }
 
     fclose(file);
-
     return X;
 }
 
@@ -234,7 +225,6 @@ Matrix update_H(Matrix H_current, Matrix W) {
     return H_new;
 }
 
-
 /* 
  * Python wrapper function to iteratively update H matrix until convergence 
  * Input: H - initial H matrix (n x k)
@@ -259,7 +249,6 @@ Matrix converge_H(Matrix H, Matrix W, double eps, int iter) {
 
     return H_new;
 }
-
 
 /* 
  * Main function to run different goals based on input arguments 
@@ -288,37 +277,23 @@ int main(int argc, char *argv[]) {
     getDimension(fileName, &n, &d);
 
     X = readData(fileName, n, d);
+    A = sym(X);
+    freeMatrix(X);
 
-    if ((strcmp(goal,"sym") == 0) || (strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)) {
-        A = sym(X);
-
-        if ((strcmp(goal,"ddg") == 0) || (strcmp(goal,"norm") == 0)){
-            D = ddg(A);
-
-            if (strcmp(goal,"norm") == 0){
-                W = norm(D, A);
-            }
+    if (strcmp(goal, "sym") == 0) {
+        printMatrix(A);
+    } else {
+        D = ddg(A);
+        if (strcmp(goal, "ddg") == 0) {
+            printMatrix(D);
+        } else if (strcmp(goal, "norm") == 0) {
+            W = norm(D, A);
+            printMatrix(W);
+            freeMatrix(W);
         }
-            if (strcmp(goal, "sym") == 0){
-                    printMatrix(A);
-                    freeMatrix(A);
-            }
-            else if (strcmp(goal, "ddg") == 0){
-                    printMatrix(D);
-                    freeMatrix(D);
-                    freeMatrix(A); 
-            } 
-            else if (strcmp(goal, "norm") == 0){
-                    printMatrix(W);
-                    freeMatrix(W);
-                    freeMatrix(D); 
-                    freeMatrix(A); 
-        }
-    } 
-    else{
-        printf("An Error Has Occurred");
-        exit(1);
+        freeMatrix(D);
     }
+    freeMatrix(A);
 
     return 0;
 }
