@@ -192,7 +192,7 @@ Matrix powerDiagMatrix(Matrix matrix, double power) {
     Matrix result;
     int i;
 
-    result = createMatrix(matrix.rows, matrix.cols, NULL);
+    result = createZeroMatrix(matrix.rows, matrix.cols);
 
     for (i = 0; i < matrix.rows; i++) {
         result.data[i][i] = pow(matrix.data[i][i], power);

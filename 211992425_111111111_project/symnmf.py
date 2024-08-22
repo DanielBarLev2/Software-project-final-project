@@ -22,21 +22,21 @@ def sys_arguments():
     k, goal, file_name = None, None, None
     
     if len(sys.argv) != 4:
-        raise ValueError(len(sys.argv), "An Error Has Occrred")
+        raise ValueError(len(sys.argv), " are not enough cmd arguments")
 
     try:
-        goal = sys.argv[1]
-        k = int(sys.argv[2])
+        k = int(sys.argv[1])
+        goal = sys.argv[2]
         file_name = sys.argv[3]
 
         if goal not in ["symnmf", "sym", "ddg", "norm"]:
-            raise ValueError("An Error Has Occrred")
+            raise ValueError("Not a valid goal")
 
     except ValueError:
-        print("An Error Has Occrred")
+        print("Invalid arguments")
         sys.exit(1)
 
-    return goal, k, file_name
+    return k, goal, file_name
 
 
 def read_data(file_name: str) -> np.ndarray:
@@ -135,7 +135,7 @@ def symNMF(x, k, n, epsilon=0.0001, max_iter=300):
 def main():
     np.random.seed(0)
     
-    goal, k, file_name = sys_arguments()
+    k, goal, file_name = sys_arguments()
     x = read_data(file_name=file_name)
     
     
